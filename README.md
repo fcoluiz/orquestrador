@@ -39,7 +39,7 @@ e não falam com você diretamente.
 - **Métricas simples em toda rodada.** Instalada como plugin, a sessão principal ganha uma faixa
   acima do prompt, atualizada ao fim de cada turno:
   ```
-  🎼 orquestrador · frentes 2 · sessões 3 · bastões 1 · PRs 0 · pico ~162k · economia estimada ~2.500k
+  🎼 orquestrador · frentes 2 · sessões 3 · bastões 1 · PRs 0 · contexto máx. ~162k · economia estimada ~2.500k
      piso evitado ~0k (0 reaproveitadas + 0 subagentes) · bastão ~2.500k (1 passagem)
   ```
   A mesma conta fecha o quadro de cada rodada como linha de texto, que também funciona sem plugin.

@@ -28,8 +28,8 @@ const lang = /[\\/]orchestrator[\\/]/.test(here) ? 'en' : 'pt';
 
 const TXT = {
   pt: {
-    line: (m) => `métricas · frentes ${m.frentes} (sessões ${m.sessoes} · reaproveitadas ${m.reaproveitadas} · subagentes ${m.subagentes} · bastões ${m.bastoes.length}) · PRs mesclados ${m.prs} · pico da principal ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
-    band: (m) => `🎼 orquestrador · frentes ${m.frentes} · sessões ${m.sessoes} · bastões ${m.bastoes.length} · PRs ${m.prs} · pico ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
+    line: (m) => `métricas · frentes ${m.frentes} (sessões ${m.sessoes} · reaproveitadas ${m.reaproveitadas} · subagentes ${m.subagentes} · bastões ${m.bastoes.length}) · PRs mesclados ${m.prs} · contexto máx. da principal ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
+    band: (m) => `🎼 orquestrador · frentes ${m.frentes} · sessões ${m.sessoes} · bastões ${m.bastoes.length} · PRs ${m.prs} · contexto máx. ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
     detail: (m) => `   piso evitado ~${fmt(m.economia.piso)}k (${m.reaproveitadas} reaproveitadas + ${m.subagentes} subagentes) · bastão ~${fmt(m.economia.bastao)}k (${m.bastoes.length} ${m.bastoes.length === 1 ? 'passagem' : 'passagens'})`,
     noSession: 'CLAUDE_CODE_SESSION_ID ausente: rode pelo Bash da sessão principal.',
     bad: (k, v) => `valor inválido em --${k}: ${v}`,

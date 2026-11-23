@@ -22,7 +22,7 @@ Principal: <id> · Skill: <caminho absoluto do SKILL.md> · Produção: back <ha
 
 ## Métricas (atualizar no momento de cada evento)
 - sessões novas: 0 · filhas reaproveitadas: 0 · subagentes no lugar de sessão: 0 · bastões: 0
-- PRs mesclados: 0 · pico da principal: ~0k
+- PRs mesclados: 0 · contexto máx. da principal: ~0k
 - bastões (entrega:início da sucessora:passos da sucessora, em k): —
 - economia estimada (saída do `metricas.mjs gravar`): ~0k
 
@@ -51,7 +51,7 @@ backup …, migrations …, ordem …, resultado …
 ## Retrospectiva (fim do lote)
 - Frentes: N (sessões novas X, filhas reaproveitadas Y, "(cont.)" Z, subagentes no lugar de sessão W)
   e a linha de métricas final (da seção "Métricas")
-- Contexto ao entregar por frente (da tabela) e o pico da principal
+- Contexto ao entregar por frente (da tabela) e o contexto máximo da principal
 - Experimento da continuação sem mensagem do dono: funcionou / recusado / não testado
 - O que deu errado ou custou caro → vira linha nova em `armadilhas.md` (ou em `limites-do-app.md`
   se for comportamento do app)
