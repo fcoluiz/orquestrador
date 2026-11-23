@@ -40,7 +40,8 @@ Rules:
 
 Done = local commit(s) + report at `<notes folder>/<front>-report.md` (cause with evidence, what
 changed, tests, what was NOT verified, migrations and whether they have DROP) + a summary of up to
-8 lines to the main session by SendMessage, with the last line `context: <~N>k`.
+8 lines to the main session by SendMessage, with the last line `context: <~N>k · steps: <N>` (steps = working turns since it
+took over the front).
 ```
 
 `start_session` parameters: `initiation` per `app-limits.md`, `context: "fresh"`, a short `name`,

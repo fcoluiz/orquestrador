@@ -118,13 +118,17 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
   round gets `no news`; a front that left the board was archived and that was said. Reason: with
   many fronts, results arrive over several turns and the owner only sees the last one; the board
   ensures no front drops out of sight by going quiet.
-- Last line of the board: the batch's **metrics line**, read from the state's "Metrics" section
-  (without opening transcripts or running commands just for it):
-  `metrics · fronts N (sessions X · reused Y · subagents W · batons Z) · PRs merged P
-  · main peak ~Mk · estimated savings ~Ek`
-  with `E = (Y + W) × 85`: the new-session floor avoided. It is an **estimate**, not a
-  measurement, and batons don't count (they avoid degradation, not a floor). A zero counter shows
-  as `0`; never invent a number the state doesn't have.
+- Last line of the board: the batch's **metrics line**, with the numbers of the state's "Metrics"
+  section. Whenever the section changes, generate the line with the script, which also feeds the
+  band above the prompt (when the skill comes from the plugin):
+  `node "<skill folder>/scripts/metricas.mjs" gravar --frentes=N --sessoes=X --reaproveitadas=Y
+  --subagentes=W --prs=P --pico=M --bastao=HANDOFF:START:STEPS` (one `--bastao` per handoff, in k).
+  Estimated savings = `(Y + W) × 85` (new-session floor avoided) + `Σ (handoff − successor's
+  start) × successor's steps` (context no longer re-read at every step). It is an **estimate**,
+  not a measurement. Successor still working: the steps from its last summary. A zero counter
+  shows as `0`; never invent a number the state doesn't have. Without the script (Codex, or an
+  error), write the line by hand with the same math. At the end of the batch: `metricas.mjs fim`
+  (the band goes away).
 
 ## Main-session context economy
 

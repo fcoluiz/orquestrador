@@ -57,6 +57,8 @@ teste) a abrir investigação nova; o que for novo e grande fica anotado no delt
    a sucessora a assumir.
 4. Lê a nota e o delta, confere no git (branch, commits, WIP) e continua **no mesmo worktree**, só
    depois de a antecessora estar parada.
+5. Ao assumir, avisa a principal com `[<frente>] andamento — assumi; contexto inicial ~Nk` (entra
+   na conta de economia do bastão).
 
 ## Principal
 

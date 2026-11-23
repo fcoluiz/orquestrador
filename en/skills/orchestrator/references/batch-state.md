@@ -26,7 +26,8 @@ transcripts.
 ## Metrics (update at the moment of each event)
 - new sessions: 0 · reused children: 0 · subagents instead of a session: 0 · batons: 0
 - PRs merged: 0 · main peak: ~0k
-- estimated savings: (reused + subagents) × 85k = ~0k
+- batons (handoff:successor's start:successor's steps, in k): —
+- estimated savings (output of `metricas.mjs gravar`): ~0k
 
 "Subagent instead of a session" only counts when the task would have become a session under the
 front-size rule (the secretary and short checks don't count). This section feeds the board's

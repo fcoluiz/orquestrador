@@ -35,11 +35,21 @@ talk to you directly.
 - **"Done" is verified.** Every child's delivery is checked in git/GitHub before it reaches you.
 - **A board every round.** Every reply from the main session ends with one line per front (state
   and who waits on what), so no front drops out of sight by going quiet.
-- **Simple metrics every round.** The board's last line sums up the batch, for example:
-  `metrics · fronts 8 (sessions 6 · reused 2 · subagents 3 · batons 1) · PRs merged 5
-  · main peak ~180k · estimated savings ~425k`. The savings are an **estimate**: each reused child
-  or subagent used instead of a session counts the ~85k floor a new session would pay. No hook or
-  script: the numbers come from the batch state file.
+- **Simple metrics every round.** Installed as a plugin, the main session gets a band above the
+  prompt, refreshed at the end of every turn:
+  ```
+  🎼 orchestrator · fronts 2 · sessions 3 · batons 1 · PRs 0 · peak ~162k · estimated savings ~2,500k
+     floor avoided ~0k (0 reused + 0 subagents) · baton ~2,500k (1 handoff)
+  ```
+  The same math closes every round's board as a text line, which also works without the plugin.
+  The savings are an **estimate** in two parts:
+  - **floor avoided:** each reused child or subagent used instead of a session counts the ~85k a
+    new session would pay;
+  - **baton:** `(context at handoff − successor's starting context) × successor's steps`, that is,
+    the context no longer re-read at every step.
+
+  Nothing runs in other sessions: the band only shows in the main session that recorded metrics, and
+  goes away with `metricas.mjs fim` at the end of the batch.
 - **Learns from use.** Each batch ends with a retrospective, and what went wrong becomes a new line
   in `pitfalls.md`, with your ok.
 

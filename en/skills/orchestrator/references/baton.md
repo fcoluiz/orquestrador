@@ -61,6 +61,8 @@ delta for the successor.
    status, or authorizes the successor to take over.
 4. Reads the note and the delta, checks git (branch, commits, WIP) and continues **in the same
    worktree**, only after the predecessor has stopped.
+5. On taking over, it tells the main session `[<front>] progress — took over; starting context
+   ~Nk` (it goes into the baton savings math).
 
 ## Main session
 

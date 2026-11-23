@@ -32,11 +32,21 @@ e não falam com você diretamente.
 - **"Pronto" conferido.** Toda entrega de filha é verificada no git/GitHub antes de chegar a você.
 - **Quadro em toda rodada.** Cada resposta da principal termina com uma linha por frente (estado e
   quem espera o quê), para nenhuma sumir de vista por ter ficado quieta.
-- **Métricas simples em toda rodada.** A última linha do quadro resume o lote, por exemplo:
-  `métricas · frentes 8 (sessões 6 · reaproveitadas 2 · subagentes 3 · bastões 1) · PRs mesclados 5
-  · pico da principal ~180k · economia estimada ~425k`. A economia é uma **estimativa**: cada filha
-  reaproveitada ou subagente no lugar de sessão conta o piso de ~85k que uma sessão nova pagaria.
-  Não há hook nem script: os números vêm do arquivo de estado do lote.
+- **Métricas simples em toda rodada.** Instalada como plugin, a sessão principal ganha uma faixa
+  acima do prompt, atualizada ao fim de cada turno:
+  ```
+  🎼 orquestrador · frentes 2 · sessões 3 · bastões 1 · PRs 0 · pico ~162k · economia estimada ~2.500k
+     piso evitado ~0k (0 reaproveitadas + 0 subagentes) · bastão ~2.500k (1 passagem)
+  ```
+  A mesma conta fecha o quadro de cada rodada como linha de texto, que também funciona sem plugin.
+  A economia é uma **estimativa** com duas partes:
+  - **piso evitado:** cada filha reaproveitada ou subagente no lugar de sessão conta os ~85k que uma
+    sessão nova pagaria;
+  - **bastão:** `(contexto ao entregar − contexto inicial da sucessora) × passos da sucessora`, ou
+    seja, o contexto que deixou de ser relido a cada passo.
+
+  Nada roda nas outras sessões: a faixa só aparece na principal que gravou métricas, e some com
+  `metricas.mjs fim` no fim do lote.
 - **Aprende com o uso.** No fim de cada lote há uma retrospectiva, e o que deu errado vira linha em
   `armadilhas.md` (com o seu ok).
 

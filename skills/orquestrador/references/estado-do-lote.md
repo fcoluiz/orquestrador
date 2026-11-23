@@ -23,7 +23,8 @@ Principal: <id> · Skill: <caminho absoluto do SKILL.md> · Produção: back <ha
 ## Métricas (atualizar no momento de cada evento)
 - sessões novas: 0 · filhas reaproveitadas: 0 · subagentes no lugar de sessão: 0 · bastões: 0
 - PRs mesclados: 0 · pico da principal: ~0k
-- economia estimada: (reaproveitadas + subagentes) × 85k = ~0k
+- bastões (entrega:início da sucessora:passos da sucessora, em k): —
+- economia estimada (saída do `metricas.mjs gravar`): ~0k
 
 "Subagente no lugar de sessão" só conta quando a tarefa teria virado sessão pela regra de tamanho
 de frente (não conta o secretário nem conferências curtas). Esta seção alimenta a linha de métricas

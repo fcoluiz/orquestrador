@@ -113,13 +113,16 @@ seção "Experimental". Recusado → o card acima, sem mudança.
   `sem novidade`; frente que saiu do quadro foi arquivada e isso foi dito. Motivo: com muitas
   frentes, os retornos chegam em vários turnos e o dono só vê o último; o quadro garante que
   nenhuma some da vista por ter ficado quieta.
-- Última linha do quadro: a **linha de métricas** do lote, lida da seção "Métricas" do estado
-  (sem abrir transcrição nem rodar comando só para isso):
-  `métricas · frentes N (sessões X · reaproveitadas Y · subagentes W · bastões Z) · PRs mesclados P
-  · pico da principal ~Mk · economia estimada ~Ek`
-  com `E = (Y + W) × 85`: o piso de sessão nova evitado. É **estimativa**, não medição, e bastões
-  não entram na conta (evitam degradar, não um piso). Contador zerado aparece como `0`; nunca
-  inventar número que o estado não tem.
+- Última linha do quadro: a **linha de métricas** do lote, com os números da seção "Métricas" do
+  estado. Sempre que a seção mudar, gere a linha pelo script, que também alimenta a faixa acima do
+  prompt (quando a skill vem pelo plugin):
+  `node "<pasta da skill>/scripts/metricas.mjs" gravar --frentes=N --sessoes=X --reaproveitadas=Y
+  --subagentes=W --prs=P --pico=M --bastao=ENTREGA:INICIO:PASSOS` (um `--bastao` por passagem, em k).
+  Economia estimada = `(Y + W) × 85` (piso de sessão nova evitado) + `Σ (entrega − início da
+  sucessora) × passos da sucessora` (contexto que deixou de ser relido a cada passo). É
+  **estimativa**, não medição. Sucessora ainda trabalhando: passos do último resumo dela. Contador
+  zerado aparece como `0`; nunca inventar número que o estado não tem. Sem o script (Codex, ou
+  erro), escreva a linha à mão com a mesma conta. No fim do lote: `metricas.mjs fim` (a faixa some).
 
 ## Economia de contexto da principal
 

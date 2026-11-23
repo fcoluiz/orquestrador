@@ -38,7 +38,8 @@ Regras:
 
 Pronto = commit(s) local(is) + relatório em `<pasta de notas>\<frente>-relatorio.md` (causa com
 evidência, o que mudou, testes, o que NÃO foi verificado, migrations e se têm DROP) + resumo de até
-8 linhas para a principal por SendMessage, com a última linha `contexto: <~N>k`.
+8 linhas para a principal por SendMessage, com a última linha `contexto: <~N>k · passos: <N>` (passos = turnos de trabalho desde que
+assumiu a frente).
 ```
 
 Parâmetros de `start_session`: `initiation` conforme `limites-do-app.md`, `context: "fresh"`,
