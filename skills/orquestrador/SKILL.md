@@ -113,6 +113,13 @@ seção "Experimental". Recusado → o card acima, sem mudança.
   `sem novidade`; frente que saiu do quadro foi arquivada e isso foi dito. Motivo: com muitas
   frentes, os retornos chegam em vários turnos e o dono só vê o último; o quadro garante que
   nenhuma some da vista por ter ficado quieta.
+- Última linha do quadro: a **linha de métricas** do lote, lida da seção "Métricas" do estado
+  (sem abrir transcrição nem rodar comando só para isso):
+  `métricas · frentes N (sessões X · reaproveitadas Y · subagentes W · bastões Z) · PRs mesclados P
+  · pico da principal ~Mk · economia estimada ~Ek`
+  com `E = (Y + W) × 85`: o piso de sessão nova evitado. É **estimativa**, não medição, e bastões
+  não entram na conta (evitam degradar, não um piso). Contador zerado aparece como `0`; nunca
+  inventar número que o estado não tem.
 
 ## Economia de contexto da principal
 

@@ -20,6 +20,15 @@ Principal: <id> · Skill: <caminho absoluto do SKILL.md> · Produção: back <ha
 ## Fila (frentes esperando vaga; máximo de 6 ativas)
 - <frente> · itens do dono · assunto (para reaproveitar filha ociosa) · desde <data>
 
+## Métricas (atualizar no momento de cada evento)
+- sessões novas: 0 · filhas reaproveitadas: 0 · subagentes no lugar de sessão: 0 · bastões: 0
+- PRs mesclados: 0 · pico da principal: ~0k
+- economia estimada: (reaproveitadas + subagentes) × 85k = ~0k
+
+"Subagente no lugar de sessão" só conta quando a tarefa teria virado sessão pela regra de tamanho
+de frente (não conta o secretário nem conferências curtas). Esta seção alimenta a linha de métricas
+do quadro e a Retrospectiva.
+
 ## Ordem de merge
 back: #A → #B (depois de #A) → …   front: …   segurados: #X (motivo)
 
@@ -40,6 +49,7 @@ backup …, migrations …, ordem …, resultado …
 
 ## Retrospectiva (fim do lote)
 - Frentes: N (sessões novas X, filhas reaproveitadas Y, "(cont.)" Z, subagentes no lugar de sessão W)
+  e a linha de métricas final (da seção "Métricas")
 - Contexto ao entregar por frente (da tabela) e o pico da principal
 - Experimento da continuação sem mensagem do dono: funcionou / recusado / não testado
 - O que deu errado ou custou caro → vira linha nova em `armadilhas.md` (ou em `limites-do-app.md`

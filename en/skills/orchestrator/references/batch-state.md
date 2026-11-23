@@ -23,6 +23,15 @@ transcripts.
 ## Queue (fronts waiting for a slot; at most 6 active)
 - <front> · owner's items · topic (to reuse an idle child) · since <date>
 
+## Metrics (update at the moment of each event)
+- new sessions: 0 · reused children: 0 · subagents instead of a session: 0 · batons: 0
+- PRs merged: 0 · main peak: ~0k
+- estimated savings: (reused + subagents) × 85k = ~0k
+
+"Subagent instead of a session" only counts when the task would have become a session under the
+front-size rule (the secretary and short checks don't count). This section feeds the board's
+metrics line and the Retrospective.
+
 ## Merge order
 back: #A → #B (after #A) → …   front: …   held: #X (reason)
 
@@ -43,6 +52,7 @@ backup …, migrations …, order …, result …
 
 ## Retrospective (end of batch)
 - Fronts: N (new sessions X, reused children Y, "(cont.)" Z, subagents instead of a session W)
+  and the final metrics line (from the "Metrics" section)
 - Context at delivery per front (from the table) and the main session's peak
 - Continuation-without-owner-message experiment: worked / refused / not tested
 - What went wrong or cost a lot → becomes a new line in `pitfalls.md` (or in `app-limits.md` if it

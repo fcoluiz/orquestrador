@@ -118,6 +118,13 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
   round gets `no news`; a front that left the board was archived and that was said. Reason: with
   many fronts, results arrive over several turns and the owner only sees the last one; the board
   ensures no front drops out of sight by going quiet.
+- Last line of the board: the batch's **metrics line**, read from the state's "Metrics" section
+  (without opening transcripts or running commands just for it):
+  `metrics · fronts N (sessions X · reused Y · subagents W · batons Z) · PRs merged P
+  · main peak ~Mk · estimated savings ~Ek`
+  with `E = (Y + W) × 85`: the new-session floor avoided. It is an **estimate**, not a
+  measurement, and batons don't count (they avoid degradation, not a floor). A zero counter shows
+  as `0`; never invent a number the state doesn't have.
 
 ## Main-session context economy
 
