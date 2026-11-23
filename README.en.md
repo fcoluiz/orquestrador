@@ -1,4 +1,4 @@
-# orquestrador
+# orquestrador / orchestrator
 
 English · [Português](README.md)
 
@@ -9,8 +9,8 @@ tracks all of them and brings you only what needs your decision.
 You talk to **one** session. The children work in parallel, each in its own worktree, and never
 talk to you directly.
 
-> The skill text is in Portuguese ("orquestrador" = orchestrator). The model follows it fine and
-> you can talk to it in any language.
+> Two editions of the same skill: **`orchestrator`** (English, `en/`) and **`orquestrador`**
+> (Portuguese, `skills/`). Install only one of them.
 
 ## Why use it
 
@@ -34,7 +34,7 @@ talk to you directly.
 - **A board every round.** Every reply from the main session ends with one line per front (state
   and who waits on what), so no front drops out of sight by going quiet.
 - **Learns from use.** Each batch ends with a retrospective, and what went wrong becomes a new line
-  in `armadilhas.md` (pitfalls), with your ok.
+  in `pitfalls.md`, with your ok.
 
 ### In real use
 
@@ -60,7 +60,7 @@ In two back-to-back batches on a real project (back end + front end), over about
 | Opens and drives child sessions by itself | **yes** | no | no |
 | Automatic context handoff | **yes** | no | no |
 | Batch state, briefs, SHA-pinned merge, pitfalls | yes | yes (manual) | yes (manual) |
-| How to call it | `/orquestrador` | `/orquestrador` | `$orquestrador`, or ask "use the orquestrador skill" |
+| How to call it | `/orchestrator` | `/orchestrator` | `$orchestrator`, or ask "use the orchestrator skill" |
 
 **Full orchestration works only in the Claude desktop app**, because the skill depends on session
 tools that exist only there. In the CLI and in Codex it still works as a **manual method**: the
@@ -75,12 +75,23 @@ skill on its own.
 
 ```
 /plugin marketplace add fcoluiz/orquestrador
-/plugin install orquestrador@orquestrador
+/plugin install orchestrator@orquestrador
 ```
 
-**Manually (Claude):** copy `skills/orquestrador/` to `~/.claude/skills/orquestrador/`.
+(For the Portuguese edition: `/plugin install orquestrador@orquestrador`.)
 
-**Codex (manual mode):** copy the same folder to `~/.codex/skills/orquestrador/`.
+The same from a terminal, outside a session:
+
+```
+claude plugin marketplace add fcoluiz/orquestrador
+```
+```
+claude plugin install orchestrator@orquestrador
+```
+
+**Manually (Claude):** copy `en/skills/orchestrator/` to `~/.claude/skills/orchestrator/`.
+
+**Codex (manual mode):** copy the same folder to `~/.codex/skills/orchestrator/`.
 
 From a terminal (Git Bash, macOS or Linux):
 
@@ -88,24 +99,26 @@ From a terminal (Git Bash, macOS or Linux):
 git clone https://github.com/fcoluiz/orquestrador.git
 ```
 ```
-cp -r orquestrador/skills/orquestrador ~/.claude/skills/
+cp -r orquestrador/en/skills/orchestrator ~/.claude/skills/
 ```
 ```
-cp -r orquestrador/skills/orquestrador ~/.codex/skills/
+cp -r orquestrador/en/skills/orchestrator ~/.codex/skills/
 ```
+
+**Update:** `claude plugin update orchestrator@orquestrador` (or `git pull` and copy again).
 
 ## Usage
 
 The skill **does not trigger by itself** (`disable-model-invocation`). Call it with your requests:
 
 ```
-/orquestrador
+/orchestrator
 1 - fix the date-range filter in reports
 2 - "All" tab visible to admins only
 3 - estimate the cost of transcribing videos (analysis only)
 ```
 
-When installed as a plugin, the command also shows up as `/orquestrador:orquestrador`.
+When installed as a plugin, the command also shows up as `/orchestrator:orchestrator`.
 
 What happens:
 
@@ -133,22 +146,25 @@ brief → work (local commit + report) → verification → PR (your ok)
 
 ## Layout
 
+English edition, in `en/skills/orchestrator/` (the Portuguese one in `skills/orquestrador/` has
+the same files under Portuguese names):
+
 | File | Purpose | Read by |
 |---|---|---|
 | `SKILL.md` | Main-session rules, lifecycle, context economy | main |
-| `references/limites-do-app.md` | App limits that shape the design | main |
-| `references/brief-filha.md` | Template for each child's brief | main |
-| `references/bastao.md` | Context handoff (baton) protocol | main and children |
-| `references/estado-do-lote.md` | Batch state file template | main |
+| `references/app-limits.md` | App limits that shape the design | main |
+| `references/child-brief.md` | Template for each child's brief | main |
+| `references/baton.md` | Context handoff (baton) protocol | main and children |
+| `references/batch-state.md` | Batch state file template | main |
 | `references/merge-ci.md` | PR, SHA-pinned merge, CI, deploy | main |
-| `references/permissoes.md` | Suggested allowlist (apply only with ok) | main |
-| `references/armadilhas.md` | Pitfalls seen in practice | main |
+| `references/permissions.md` | Suggested allowlist (apply only with ok) | main |
+| `references/pitfalls.md` | Pitfalls seen in practice | main |
 
 ## Limitations
 
 - The app limits were observed in November 2026 and may change with new versions. They are
-  documented in `limites-do-app.md`.
-- The "Experimental" section of `limites-do-app.md` (starting the continuation without waiting for
+  documented in `app-limits.md`.
+- The "Experimental" section of `app-limits.md` (starting the continuation without waiting for
   your message) is optional and unconfirmed. Without it, the skill works with cards.
 
 ## License

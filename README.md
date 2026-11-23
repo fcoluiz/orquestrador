@@ -74,6 +74,17 @@ No Codex, `disable-model-invocation` não tem efeito, então ele pode sugerir a 
 /plugin install orquestrador@orquestrador
 ```
 
+(Edição em inglês: `/plugin install orchestrator@orquestrador`. Instale só uma das duas.)
+
+O mesmo pelo terminal, fora de uma sessão:
+
+```
+claude plugin marketplace add fcoluiz/orquestrador
+```
+```
+claude plugin install orquestrador@orquestrador
+```
+
 **Manual (Claude):** copie a pasta `skills/orquestrador/` para `~/.claude/skills/orquestrador/`.
 
 **Codex (modo manual):** copie a mesma pasta para `~/.codex/skills/orquestrador/`.
@@ -89,6 +100,8 @@ cp -r orquestrador/skills/orquestrador ~/.claude/skills/
 ```
 cp -r orquestrador/skills/orquestrador ~/.codex/skills/
 ```
+
+**Atualizar:** `claude plugin update orquestrador@orquestrador` (ou `git pull` e copiar de novo).
 
 ## Como usar
 
@@ -146,7 +159,7 @@ brief → trabalho (commit local + relatório) → conferência → PR (seu ok)
   estão documentados em `limites-do-app.md`.
 - A seção "Experimental" de `limites-do-app.md` (iniciar a continuação sem esperar mensagem sua) é
   opcional e não foi confirmada. Sem ela, a skill funciona com os cards.
-- O texto da skill está em português. A conversa pode ser em qualquer idioma.
+- Há uma edição em inglês da skill (`orchestrator`, pasta `en/`), com o mesmo conteúdo.
 
 ## Licença
 

@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "orquestrador",
-      "description": "One main session splits the work into independent fronts and drives child sessions through brief, context handoff, PR, merge with green CI and archiving.",
+      "description": "Portuguese (pt-BR) edition. One main session splits the work into independent fronts and drives child sessions through brief, context handoff, PR, merge with green CI and archiving.",
       "author": {
         "name": "Luiz Nogueira"
       },
@@ -17,6 +17,18 @@
       "license": "MIT",
       "category": "productivity",
       "source": "./"
+    },
+    {
+      "name": "orchestrator",
+      "description": "English edition. One main session splits the work into independent fronts and drives child sessions through brief, context handoff, PR, merge with green CI and archiving.",
+      "author": {
+        "name": "Luiz Nogueira"
+      },
+      "homepage": "https://github.com/fcoluiz/orquestrador",
+      "repository": "https://github.com/fcoluiz/orquestrador",
+      "license": "MIT",
+      "category": "productivity",
+      "source": "./en"
     }
   ]
 }
