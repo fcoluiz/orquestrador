@@ -12,6 +12,8 @@ talk to you directly.
 > Two editions of the same skill: **`orchestrator`** (English, `en/`) and **`orquestrador`**
 > (Portuguese, `skills/`). Install only one of them.
 
+![How the orchestrator works](docs/img/how-it-works.en.svg)
+
 ## Why use it
 
 - **Many requests at once, without losing track.** A list of 5–10 asks becomes parallel fronts.
@@ -43,12 +45,23 @@ talk to you directly.
 
 ### In real use
 
-In two back-to-back batches on a real project (back end + front end), over about three days:
+Three back-to-back batches on a real project (back end + front end), the third still in progress:
 
-- ~20 fronts, across fixes, features, analyses and tests;
-- 5 context handoffs, with no work lost or duplicated;
+![In real use: fronts, batons and deploys per batch](docs/img/real-use.en.svg)
+
+- 26 fronts, across fixes, features, analyses and tests;
+- 8 context handoffs, with no work lost or duplicated;
 - 9 deploys, each one only on the owner's explicit request, always back end before front end;
 - analysis fronts running on a cheaper model.
+
+### Why the baton pays off
+
+Every step of a session re-reads its whole context, so the cost of a step grows with it. Handing
+the front to a new session near 200k keeps each step cheap. In the model below, using the measured
+constants (~85k floor, a step at 270k costing ~2× a step at 120k), a 60-step front re-reads **38%
+less** context with batons. It is a model, not a measurement of a specific batch.
+
+![Why the baton pays off](docs/img/baton.en.svg)
 
 ## Requirements
 

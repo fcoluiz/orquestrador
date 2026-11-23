@@ -9,6 +9,8 @@ acompanha tudo e só leva a você o que exige decisão sua.
 Você conversa com **uma** sessão. As filhas trabalham em paralelo, cada uma no próprio worktree,
 e não falam com você diretamente.
 
+![Como o orquestrador funciona](docs/img/como-funciona.pt.svg)
+
 ## Por que usar
 
 - **Várias demandas ao mesmo tempo, sem perder o fio.** Uma lista de 5–10 pedidos vira frentes
@@ -40,12 +42,23 @@ e não falam com você diretamente.
 
 ### Em uso real
 
-Em dois lotes seguidos num projeto real (back-end + front-end), em cerca de três dias:
+Três lotes seguidos num projeto real (back-end + front-end), o terceiro ainda em andamento:
 
-- ~20 frentes, entre correções, features, análises e testes;
-- 5 passagens de bastão por contexto, sem trabalho perdido nem duplicado;
+![Em uso real: frentes, bastões e deploys por lote](docs/img/uso-real.pt.svg)
+
+- 26 frentes, entre correções, features, análises e testes;
+- 8 passagens de bastão por contexto, sem trabalho perdido nem duplicado;
 - 9 deploys feitos só com pedido explícito do dono, sempre back antes do front;
 - frentes de análise rodando em modelo mais barato.
+
+### Por que o bastão compensa
+
+Cada passo de uma sessão relê o contexto inteiro, então o custo do passo cresce junto com ele. Passar
+a frente para uma sessão nova perto de 200k mantém cada passo barato. No modelo abaixo, com as
+constantes medidas (piso de ~85k, passo em 270k custando ~2× um passo em 120k), uma frente de 60
+passos relê **38% menos** contexto com bastão. É um modelo, não uma medição de um lote específico.
+
+![Por que o bastão compensa](docs/img/bastao.pt.svg)
 
 ## Requisitos
 
