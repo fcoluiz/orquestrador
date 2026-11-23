@@ -22,7 +22,11 @@ e não falam com você diretamente.
   ~120k.
 - **Custo sob controle.** Cada sessão nova paga um piso de ~85k tokens. Por isso a skill decide o
   que vira sessão, o que vira subagente e quando reaproveitar uma filha ociosa do mesmo assunto.
-  Análise só de leitura vai para um modelo mais barato (Sonnet, ou Haiku para varredura mecânica).
+  Cada frente recebe modelo e esforço pela tarefa: código com decisão fica no modelo da principal
+  (esforço médio quando o desenho já está definido), análise e escrita mecânica já decidida vão
+  para o Sonnet, varredura para o Haiku. Você vê a escolha de cada frente ao abrir o lote.
+- **Sem loop de tentativa e erro.** Depois de duas tentativas falhas na mesma coisa, a filha para e
+  escala com o que tentou, o erro e a hipótese.
 - **Você aprova; ninguém aprova por você.** PR, merge, migration e deploy só acontecem com o seu
   ok, e a principal cita suas palavras ao repassar a decisão. Mensagem de filha nunca vale como
   aprovação. O ok de merge vale para uma lista fechada de PRs **com o SHA** daquele momento: push

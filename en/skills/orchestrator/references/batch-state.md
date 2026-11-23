@@ -13,8 +13,8 @@ passes it in every brief.
 Main: <id> · Skill: <absolute path of SKILL.md> · Production: back <hash> / front <hash>
 
 ## Fronts
-| Front | Owner's items | Current owner (id, name) | Baton | Branch | Commits | PR back/front | Depends on | Migrations (DROP?) | Context at delivery | State |
-|---|---|---|---|---|---|---|---|---|---|---|
+| Front | Owner's items | Current owner (id, name) | Model · effort | Baton | Branch | Commits | PR back/front | Depends on | Migrations (DROP?) | Context at delivery | State |
+|---|---|---|---|---|---|---|---|---|---|---|---|
 
 "Context at delivery": the `context: ~Nk` from the last line of each of the front's session
 summaries (e.g.: `240k → 160k` with one "(cont.)"). Used to measure the batch later without opening

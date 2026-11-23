@@ -34,8 +34,17 @@ resolve o **caminho absoluto** dessa pasta, grava no estado do lote e o passa em
 5. **No máximo 6 frentes ativas** (com sessão rodando ou esperando algo). As demais vão para a
    "Fila" do estado e abrem quando uma frente for arquivada. Mais frentes = mais contexto na
    principal, mais conflito de merge e mais atenção do dono. O dono pode pedir outro limite.
-6. `mark_chapter`, depois uma `start_session` por frente com o brief de `brief-filha.md`.
-   Análise só-leitura → modelo mais barato (Sonnet; Haiku para varredura mecânica).
+6. **Modelo e esforço por frente** (parâmetros `model` e `effort` do `start_session`):
+   - Código com decisão (feature, correção, migração, segurança) → modelo da principal, sem passar
+     `model`. Esforço `medium` quando o desenho ou a causa já estão definidos no brief; sem
+     `effort` (herda o da principal) quando a frente começa por diagnóstico sem causa conhecida,
+     arquitetura, migração ou segurança.
+   - Análise só leitura → Sonnet. Varredura mecânica (listar, contar, achar usos) → Haiku.
+   - Escrita mecânica já decidida (texto, tradução, CSS pontual, renomear em N arquivos) → Sonnet.
+     Nunca para lógica de negócio ou código que exija decisão.
+   - Ao abrir o lote, diga ao dono numa linha por frente qual modelo e esforço ficou e por quê, e
+     registre na coluna "Modelo · esforço" do estado. O dono pode trocar.
+7. `mark_chapter`, depois uma `start_session` por frente com o brief de `brief-filha.md`.
 
 ## Regras da principal
 

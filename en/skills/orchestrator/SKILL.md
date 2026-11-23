@@ -36,8 +36,17 @@ in every brief.
    state's "Queue" and open when a front is archived. More fronts = more context in the main
    session, more merge conflicts and more of the owner's attention. The owner may ask for another
    limit.
-6. `mark_chapter`, then one `start_session` per front with the brief from `child-brief.md`.
-   Read-only analysis → cheaper model (Sonnet; Haiku for mechanical sweeps).
+6. **Model and effort per front** (`start_session`'s `model` and `effort` parameters):
+   - Code that needs decisions (feature, fix, migration, security) → the main session's model,
+     without passing `model`. Effort `medium` when the design or the cause is already settled in
+     the brief; no `effort` (inherits the main session's) when the front starts with a diagnosis
+     with no known cause, architecture, a migration or security.
+   - Read-only analysis → Sonnet. Mechanical sweep (list, count, find usages) → Haiku.
+   - Mechanical writing already decided (text, translation, a targeted CSS change, renaming across
+     N files) → Sonnet. Never for business logic or code that needs decisions.
+   - When opening the batch, tell the owner in one line per front which model and effort it got and
+     why, and record it in the state's "Model · effort" column. The owner may change it.
+7. `mark_chapter`, then one `start_session` per front with the brief from `child-brief.md`.
 
 ## Main-session rules
 

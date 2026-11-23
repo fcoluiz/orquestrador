@@ -11,8 +11,8 @@ Pasta de notas: a principal fixa **um caminho absoluto** no início do lote, for
 Principal: <id> · Skill: <caminho absoluto do SKILL.md> · Produção: back <hash> / front <hash>
 
 ## Frentes
-| Frente | Itens do dono | Dono atual (id, nome) | Bastão | Branch | Commits | PR back/front | Depende de | Migrations (DROP?) | Contexto ao entregar | Estado |
-|---|---|---|---|---|---|---|---|---|---|---|
+| Frente | Itens do dono | Dono atual (id, nome) | Modelo · esforço | Bastão | Branch | Commits | PR back/front | Depende de | Migrations (DROP?) | Contexto ao entregar | Estado |
+|---|---|---|---|---|---|---|---|---|---|---|---|
 
 "Contexto ao entregar": o `contexto: ~Nk` da última linha do resumo de cada sessão da frente
 (ex.: `240k → 160k` com uma "(cont.)"). Serve para medir o lote depois sem abrir transcrições.

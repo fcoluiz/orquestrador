@@ -24,7 +24,12 @@ talk to you directly.
   duplicated or lost. Measured: near 270k, each step costs twice as much as a step at ~120k.
 - **Cost under control.** Every new session pays a floor of ~85k tokens. So the skill decides what
   becomes a session, what becomes a subagent, and when to reuse an idle child on the same topic.
-  Read-only analysis runs on a cheaper model (Sonnet, or Haiku for mechanical sweeps).
+  Each front gets a model and effort fit for the task: code that needs decisions stays on the main
+  session's model (medium effort when the design is already settled), analysis and mechanical
+  writing already decided go to Sonnet, sweeps to Haiku. You see each front's choice when the
+  batch opens.
+- **No trial-and-error loops.** After two failed attempts at the same thing, the child stops and
+  escalates with what it tried, the error and its hypothesis.
 - **You approve, and nobody approves for you.** PR, merge, migration and deploy happen only with
   your ok, and the main session quotes your words when it passes a decision on. A child's message
   never counts as approval. A merge ok covers a closed list of PRs **pinned to their SHA** at that
