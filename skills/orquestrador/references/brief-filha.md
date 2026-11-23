@@ -33,7 +33,8 @@ Regras:
 - Contexto é custo: tudo que entra é relido em cada passo. Arquivo grande por trecho (busca +
   leitura com offset/limite), saídas com `--oneline`/`--short`/`--jq`/`| tail -n 40`, testes
   trazendo só o resumo e as falhas. Varredura ampla ou log longo → subagente que devolve a conclusão.
-- Em ~200k de contexto: protocolo do bastão (não siga a oferta do hook de nova sessão).
+- Em ~200k de contexto: protocolo do bastão (não siga a oferta do hook de nova sessão). Nunca use
+  `/compact`: filha sempre continua numa sessão nova.
 - Toda mensagem à principal começa com UMA linha `[<frente>] <tipo> — <o que precisa ou o que
   houve>`, tipo = `pronto` | `bastão` | `pergunta` | `bloqueio` | `andamento`. O aviso que chega à
   principal pode vir cortado em ~400 caracteres: o essencial vai nessa linha; detalhe depois.

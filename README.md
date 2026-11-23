@@ -49,6 +49,11 @@ e não falam com você diretamente.
   - **bastão:** `(contexto ao entregar − contexto inicial da sucessora) × passos da sucessora`, ou
     seja, o contexto que deixou de ser relido a cada passo.
 
+  - **compactação automática da principal:** em 200k de contexto, a faixa compacta a sessão
+    principal ao fim do turno, com instruções que mantêm os caminhos do estado do lote e da skill.
+    Ela continua sendo a mesma sessão, então os avisos das filhas seguem chegando. As filhas
+    nunca compactam: passam o bastão para uma sessão nova.
+
   Nada roda nas outras sessões: a faixa só aparece na principal que gravou métricas, e some com
   `metricas.mjs fim` no fim do lote.
 - **Aprende com o uso.** No fim de cada lote há uma retrospectiva, e o que deu errado vira linha em

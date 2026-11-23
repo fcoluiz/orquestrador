@@ -2,15 +2,21 @@
 // Métricas do lote do orquestrador. Sem dependências.
 //
 //   node metricas.mjs gravar --frentes=N --sessoes=X --reaproveitadas=Y --subagentes=W --prs=P
-//        --pico=M [--bastao=ENTREGA:INICIO:PASSOS ...]
+//        --pico=M [--bastao=ENTREGA:INICIO:PASSOS ...] [--estado=<caminho>] [--skill=<caminho>]
+//        [--compactar-em=200]
 //     A sessão principal roda pelo Bash a cada atualização do estado. Grava
 //     <config>/orquestrador/sessoes/<CLAUDE_CODE_SESSION_ID>.json e imprime a linha de métricas
-//     que vai no fim do quadro. Valores em mil tokens (k).
+//     que vai no fim do quadro. Valores em mil tokens (k). `--estado`, `--skill` e
+//     `--compactar-em` ficam gravados: basta passar uma vez, no início do lote.
 //   node metricas.mjs faixa --session=<id>
-//     Usado pela faixa acima do prompt (hooks/faixa.tsx): imprime {"text","detail"} da sessão,
-//     ou nada quando ela não é uma principal com lote ativo.
+//     Usado pela faixa acima do prompt (hooks/faixa.tsx): imprime o JSON da faixa e da
+//     compactação automática, ou nada quando a sessão não é uma principal com lote ativo.
+//   node metricas.mjs compactou --session=<id>
+//     A faixa registra que compactou a principal.
+//   node metricas.mjs instrucoes
+//     Imprime o texto para `/compact` (sem o plugin, a principal o entrega ao dono).
 //   node metricas.mjs fim
-//     Apaga o arquivo da sessão (fim do lote): a faixa some.
+//     Apaga o arquivo da sessão (fim do lote): a faixa e a compactação automática param.
 //
 // Economia estimada (em k):
 //   piso evitado  = (reaproveitadas + subagentes) × 85
@@ -22,6 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PISO = 85;
+const COMPACTAR_EM = 200;
 const VALIDADE_MS = 7 * 24 * 3600 * 1000;
 const here = fileURLToPath(import.meta.url);
 const lang = /[\\/]orchestrator[\\/]/.test(here) ? 'en' : 'pt';
@@ -30,20 +37,38 @@ const TXT = {
   pt: {
     line: (m) => `métricas · frentes ${m.frentes} (sessões ${m.sessoes} · reaproveitadas ${m.reaproveitadas} · subagentes ${m.subagentes} · bastões ${m.bastoes.length}) · PRs mesclados ${m.prs} · contexto máx. da principal ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
     band: (m) => `🎼 orquestrador · frentes ${m.frentes} · sessões ${m.sessoes} · bastões ${m.bastoes.length} · PRs ${m.prs} · contexto máx. ~${m.pico}k · economia estimada ~${fmt(m.economia.total)}k`,
-    detail: (m) => `   piso evitado ~${fmt(m.economia.piso)}k (${m.reaproveitadas} reaproveitadas + ${m.subagentes} subagentes) · bastão ~${fmt(m.economia.bastao)}k (${m.bastoes.length} ${m.bastoes.length === 1 ? 'passagem' : 'passagens'})`,
+    detail: (m) => `   piso evitado ~${fmt(m.economia.piso)}k (${m.reaproveitadas} reaproveitadas + ${m.subagentes} subagentes) · bastão ~${fmt(m.economia.bastao)}k (${m.bastoes.length} ${m.bastoes.length === 1 ? 'passagem' : 'passagens'})` +
+      (m.compactarEm ? ` · compacta em ${m.compactarEm}k` : '') +
+      (m.compactacoes ? ` (${m.compactacoes}× até agora)` : ''),
+    aviso: (k) => `orquestrador: compactando a sessão principal (~${k}k de contexto)`,
+    instr: (m) => [
+      'Esta é a sessão PRINCIPAL do orquestrador.',
+      `Mantenha no resumo, literalmente: o caminho do estado do lote (${m.estado || 'veja o início da conversa'}) e o do SKILL.md (${m.skill || 'veja o início da conversa'}).`,
+      'Mantenha também: cada frente aberta com dono atual (id), branch, PR e o que ela espera; oks do dono pendentes e as decisões dele com as palavras dele; bastões e cards pendentes com task_id; o que a principal estava fazendo no último turno.',
+      'Primeira ação depois do resumo: reler o SKILL.md e o estado do lote pelos caminhos acima, antes de responder ou agir.',
+    ].join(' '),
     noSession: 'CLAUDE_CODE_SESSION_ID ausente: rode pelo Bash da sessão principal.',
     bad: (k, v) => `valor inválido em --${k}: ${v}`,
     badBaton: (v) => `--bastao espera ENTREGA:INICIO:PASSOS (números), veio: ${v}`,
-    usage: 'uso: metricas.mjs gravar|faixa|fim [opções]',
+    usage: 'uso: metricas.mjs gravar|faixa|compactou|instrucoes|fim [opções]',
   },
   en: {
     line: (m) => `metrics · fronts ${m.frentes} (sessions ${m.sessoes} · reused ${m.reaproveitadas} · subagents ${m.subagentes} · batons ${m.bastoes.length}) · PRs merged ${m.prs} · main peak ~${m.pico}k · estimated savings ~${fmt(m.economia.total)}k`,
     band: (m) => `🎼 orchestrator · fronts ${m.frentes} · sessions ${m.sessoes} · batons ${m.bastoes.length} · PRs ${m.prs} · peak ~${m.pico}k · estimated savings ~${fmt(m.economia.total)}k`,
-    detail: (m) => `   floor avoided ~${fmt(m.economia.piso)}k (${m.reaproveitadas} reused + ${m.subagentes} subagents) · baton ~${fmt(m.economia.bastao)}k (${m.bastoes.length} ${m.bastoes.length === 1 ? 'handoff' : 'handoffs'})`,
+    detail: (m) => `   floor avoided ~${fmt(m.economia.piso)}k (${m.reaproveitadas} reused + ${m.subagentes} subagents) · baton ~${fmt(m.economia.bastao)}k (${m.bastoes.length} ${m.bastoes.length === 1 ? 'handoff' : 'handoffs'})` +
+      (m.compactarEm ? ` · compacts at ${m.compactarEm}k` : '') +
+      (m.compactacoes ? ` (${m.compactacoes}× so far)` : ''),
+    aviso: (k) => `orchestrator: compacting the main session (~${k}k of context)`,
+    instr: (m) => [
+      'This is the orchestrator MAIN session.',
+      `Keep in the summary, verbatim: the path of the batch state (${m.estado || 'see the start of the conversation'}) and of SKILL.md (${m.skill || 'see the start of the conversation'}).`,
+      'Also keep: each open front with its current owner (id), branch, PR and what it is waiting for; the owner\'s pending oks and decisions in their own words; pending batons and cards with task_id; what the main session was doing in the last turn.',
+      'First action after the summary: re-read SKILL.md and the batch state from the paths above, before answering or acting.',
+    ].join(' '),
     noSession: 'CLAUDE_CODE_SESSION_ID missing: run it from the main session\'s Bash.',
     bad: (k, v) => `invalid value for --${k}: ${v}`,
     badBaton: (v) => `--bastao expects HANDOFF:START:STEPS (numbers), got: ${v}`,
-    usage: 'usage: metricas.mjs gravar|faixa|fim [options]',
+    usage: 'usage: metricas.mjs gravar|faixa|compactou|instrucoes|fim [options]',
   },
 }[lang];
 
@@ -61,6 +86,14 @@ function arquivo(id) {
   return path.join(dir(), `${id}.json`);
 }
 
+function ler(f) {
+  try {
+    return JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function args(argv) {
   const out = { bastao: [] };
   for (const a of argv) {
@@ -72,10 +105,17 @@ function args(argv) {
   return out;
 }
 
-function inteiro(o, k) {
-  const v = o[k] ?? '0';
+function inteiro(o, k, padrao = 0) {
+  const v = o[k] ?? String(padrao);
   if (!/^\d{1,7}$/.test(String(v))) throw new Error(TXT.bad(k, v));
   return Number(v);
+}
+
+function caminho(o, k, anterior) {
+  if (o[k] === undefined) return anterior || '';
+  const v = o[k];
+  if (v.length > 500 || /[\r\n\0]/.test(v)) throw new Error(TXT.bad(k, v.slice(0, 40)));
+  return v;
 }
 
 export function calcular(o) {
@@ -102,21 +142,44 @@ function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   const o = args(rest);
   if (cmd === 'gravar') {
-    const id = process.env.CLAUDE_CODE_SESSION_ID;
-    const f = arquivo(id);
+    const f = arquivo(process.env.CLAUDE_CODE_SESSION_ID);
     if (!f) throw new Error(TXT.noSession);
+    const antes = ler(f) || {};
     const m = calcular(o);
+    m.estado = caminho(o, 'estado', antes.estado);
+    m.skill = caminho(o, 'skill', antes.skill);
+    m.compactarEm = o['compactar-em'] !== undefined ? inteiro(o, 'compactar-em') : antes.compactarEm ?? COMPACTAR_EM;
+    m.compactacoes = antes.compactacoes || 0;
     fs.mkdirSync(dir(), { recursive: true });
-    fs.writeFileSync(f, JSON.stringify({ v: 1, lang, at: Date.now(), ...m }, null, 2));
+    fs.writeFileSync(f, JSON.stringify({ v: 2, lang, at: Date.now(), ...m }, null, 2));
     console.log(TXT.line(m));
     return;
   }
   if (cmd === 'faixa') {
     const f = arquivo(o.session);
-    if (!f || !fs.existsSync(f)) return;
-    const m = JSON.parse(fs.readFileSync(f, 'utf8'));
-    if (!(Date.now() - m.at < VALIDADE_MS)) return;
-    process.stdout.write(JSON.stringify({ text: TXT.band(m), detail: TXT.detail(m) }));
+    const m = f && ler(f);
+    if (!m || !(Date.now() - m.at < VALIDADE_MS)) return;
+    process.stdout.write(JSON.stringify({
+      text: TXT.band(m),
+      detail: TXT.detail(m),
+      compactarEm: m.compactarEm || 0,
+      instrucoes: TXT.instr(m),
+      aviso: TXT.aviso('%K'),
+    }));
+    return;
+  }
+  if (cmd === 'compactou') {
+    const f = arquivo(o.session);
+    const m = f && ler(f);
+    if (!m) return;
+    m.compactacoes = (m.compactacoes || 0) + 1;
+    m.at = Date.now();
+    fs.writeFileSync(f, JSON.stringify(m, null, 2));
+    return;
+  }
+  if (cmd === 'instrucoes') {
+    const f = arquivo(process.env.CLAUDE_CODE_SESSION_ID);
+    console.log(TXT.instr((f && ler(f)) || {}));
     return;
   }
   if (cmd === 'fim') {

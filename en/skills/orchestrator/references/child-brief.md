@@ -34,7 +34,8 @@ Rules:
   (search + read with offset/limit), output with `--oneline`/`--short`/`--jq`/`| tail -n 40`, tests
   bringing back only the summary and failures. Wide sweep or long log → a subagent that returns the
   conclusion.
-- At ~200k of context: the baton protocol (don't follow the hook's offer of a new session).
+- At ~200k of context: the baton protocol (don't follow the hook's offer of a new session). Never
+  use `/compact`: a child always continues in a new session.
 - Every message to the main session starts with ONE line `[<front>] <type> — <what you need or what
   happened>`, type = `ready` | `baton` | `question` | `blocked` | `progress`. The notice that
   reaches the main session may be cut at ~400 characters: the essentials go in that line; details

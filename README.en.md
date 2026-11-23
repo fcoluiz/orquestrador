@@ -53,6 +53,11 @@ talk to you directly.
   - **baton:** `(context at handoff − successor's starting context) × successor's steps`, that is,
     the context no longer re-read at every step.
 
+  - **automatic compaction of the main session:** at 200k of context, the band compacts the main
+    session at the end of the turn, with instructions that keep the batch state and skill paths.
+    It stays the same session, so the children's notices keep arriving. Children never compact:
+    they hand the baton to a new session.
+
   Nothing runs in other sessions: the band only shows in the main session that recorded metrics, and
   goes away with `metricas.mjs fim` at the end of the batch.
 - **Learns from use.** Each batch ends with a retrospective, and what went wrong becomes a new line

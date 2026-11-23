@@ -22,6 +22,9 @@ resolve o **caminho absoluto** dessa pasta, grava no estado do lote e o passa em
 1. Fixar a pasta de notas (caminho absoluto, fora dos repos) e criar o estado do lote. Opcional:
    pedir ao dono a frase do experimento de continuação (`limites-do-app.md`, "Experimental");
    sem ela, o lote segue com cards.
+   Logo depois, registrar a sessão como principal: `node "<pasta da skill>/scripts/metricas.mjs"
+   gravar --estado="<caminho do estado>" --skill="<caminho deste SKILL.md>"` (liga a faixa e a
+   compactação automática em 200k; `--compactar-em=N` muda o limite).
 2. Sugerir ao dono a allowlist de `permissoes.md` se ainda não estiver aplicada (só aplica com ok).
 3. Dividir em frentes **independentes** (sem tocar os mesmos arquivos). Dependentes partem da
    branch da outra; registrar na tabela de dependências.
@@ -156,8 +159,13 @@ saídas de `git`/`gh` e arquivamentos repetidos, não de decisões.
 - Depois de uma compactação (resumo automático da conversa), antes de agir: reler
   este SKILL.md (caminho absoluto anotado no estado) e o arquivo de estado do lote. A skill não
   se recarrega sozinha (só o dono a ativa, por `/orquestrador`), e o resumo perde regras.
-- ~250k: avisar o dono e passar a operar só por resumos/estado. ~350k: avisar de novo antes de
-  seguir. Recuperação (último caso): uma nova
+- **~200k: compactar a principal**, nunca trocá-la (a compactação mantém a mesma sessão, então os
+  avisos das filhas continuam chegando). Antes, deixar o estado do lote atualizado. Com o plugin, a
+  faixa compacta sozinha ao fim do turno em que a principal passa do limite, com instruções que
+  mantêm os caminhos do estado e da skill. Sem o plugin (Codex, cópia manual), pedir ao dono que
+  digite `/compact` seguido do texto de `metricas.mjs instrucoes`.
+- Só as **filhas** nunca compactam: em ~200k elas passam o bastão (`bastao.md`).
+- Recuperação (último caso, principal travada): uma nova
   principal lê o estado do lote; as filhas antigas continuam, mas os avisos de fim de turno delas
   não chegam à nova — a nova principal pede a cada filha que responda por `SendMessage` e acompanha
   por `get_session`/`list_events`.

@@ -23,6 +23,9 @@ in every brief.
 1. Fix the notes folder (absolute path, outside the repos) and create the batch state. Optional:
    ask the owner for the continuation-experiment sentence (`app-limits.md`, "Experimental");
    without it, the batch runs with cards.
+   Right after, register the session as the main one: `node "<skill folder>/scripts/metricas.mjs"
+   gravar --estado="<state path>" --skill="<path of this SKILL.md>"` (turns on the band and the
+   automatic compaction at 200k; `--compactar-em=N` changes the limit).
 2. Suggest the `permissions.md` allowlist to the owner if it is not applied yet (apply only with ok).
 3. Split into **independent** fronts (not touching the same files). Dependent fronts branch off the
    other's branch; record it in the dependency table.
@@ -162,8 +165,13 @@ peak 450k), and the bulk came from `git`/`gh` output and repeated archiving, not
 - After a compaction (automatic conversation summary), before acting: re-read this SKILL.md
   (absolute path recorded in the state) and the batch state file. The skill does not reload by
   itself (only the owner triggers it, via `/orchestrator`), and the summary loses rules.
-- ~250k: tell the owner and switch to operating only from summaries/state. ~350k: warn again before
-  continuing. Recovery (last resort): a new main session reads the batch state; the old children
+- **~200k: compact the main session**, never replace it (compaction keeps the same session, so the
+  children's notices keep arriving). First, bring the batch state up to date. With the plugin, the
+  band compacts it by itself at the end of the turn in which the main session crosses the limit,
+  with instructions that keep the state and skill paths. Without the plugin (Codex, manual copy),
+  ask the owner to type `/compact` followed by the text of `metricas.mjs instrucoes`.
+- Only **children** never compact: at ~200k they hand off the baton (`baton.md`).
+- Recovery (last resort, main session stuck): a new main session reads the batch state; the old children
   keep running, but their end-of-turn notices don't reach the new one — the new main session asks
   each child to reply by `SendMessage` and follows them with `get_session`/`list_events`.
 
