@@ -18,6 +18,10 @@
 - Order from the state's dependency table. Stacked PRs only after the base; before that, check
   that only their own commits remain (`gh api repos/<r>/compare/<prod>...<branch>` → `ahead_by`).
 - Use the repository's method (e.g.: `gh pr merge --merge`).
+- **Never `gh pr merge --auto`** to "merge when CI passes": it only waits for **required** checks;
+  in a repository with none, it merges at once. The plugin refuses the command. The way is
+  `mergeit` below, which waits for the checks, stops without a green check and pins the approved
+  SHA.
 - Wait and merge in the background:
 
 ```bash
@@ -49,6 +53,12 @@ mergeit <repo> <n> <sha> && mergeit <repo> <m> <sha>
   the state.
 
 ## Deploy (only on the owner's explicit request)
+- **Check first, build it on the spot.** Right before each deploy: version on the server
+  (published commit/tag/hash) × branch tip × last deploy noted in the state. The server has
+  something the state doesn't know (another batch or person deployed) → stop and take it to the
+  owner. The deploy sequence is built from that check, never from instructions written earlier.
+- Another active batch in the same repository (band warning, or shared `--repos`) → the same check
+  before each merge too: `git fetch` and what entered main since the batch's last merge.
 - Follow the project's runbook (CLAUDE.md/docs). Default: database backup and a read check →
   transport (pull or a SHA-256-verified bundle) with fast-forward in a clean clone → migrations via
   the runner (order, owner's ok for DROP) → enable each environment separately (reload one process

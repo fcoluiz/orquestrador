@@ -24,7 +24,10 @@ resolve o **caminho absoluto** dessa pasta, grava no estado do lote e o passa em
    sem ela, o lote segue com cards.
    Logo depois, registrar a sessão como principal: `node "<pasta da skill>/scripts/metricas.mjs"
    gravar --estado="<caminho do estado>" --skill="<caminho deste SKILL.md>"` (liga a faixa e a
-   compactação automática em 200k; `--compactar-em=N` muda o limite).
+   compactação automática em 200k; `--compactar-em=N` muda o limite). Passe também
+   `--repos=dono/repo,...` com os repositórios em que o lote vai mesclar ou publicar: se outra
+   principal ativa registrou algum deles, a faixa avisa, e antes de cada merge ou deploy nesse
+   repositório a principal confere o main e o servidor (`merge-ci.md`).
 2. Sugerir ao dono a allowlist de `permissoes.md` se ainda não estiver aplicada (só aplica com ok).
 3. Dividir em frentes **independentes** (sem tocar os mesmos arquivos). Dependentes partem da
    branch da outra; registrar na tabela de dependências.
@@ -123,8 +126,10 @@ seção "Experimental". Recusado → o card acima, sem mudança.
   --relatorio=<caminho>` (imprime o id, `D1`, `D2`...). A mensagem abre com as decisões pendentes
   (`metricas.mjs decisoes`), uma por linha com id e opções; as frentes que só informam ficam no
   quadro. Com o plugin, a faixa mostra uma decisão por vez, e o botão só preenche o prompt
-  (`D2: sim`): quem envia é o dono. Resposta `Dn: …` do dono → repassar à filha citando as
-  palavras dele e `metricas.mjs decidiu --id=Dn`. Decisão nunca sai da fila sem resposta do dono.
+  (`D2: sim`): quem envia é o dono. Resposta `Dn: …` do dono → **no mesmo turno**, antes de
+  qualquer outra coisa: repassar à filha citando as palavras dele (`SendMessage`) e só então
+  `metricas.mjs decidiu --id=Dn`. Nunca "repasso depois". Decisão nunca sai da fila sem resposta
+  do dono. Com o plugin, a faixa acusa em amarelo a decisão respondida que ficou na fila.
 - Fechar com: o que entrou, quem espera o quê e a próxima ação.
 - E sempre com o **quadro das frentes**, no fim da mensagem final: uma linha por frente ainda não
   arquivada, **todas, inclusive as sem novidade**, sempre na mesma ordem (a da tabela do estado),

@@ -3,11 +3,13 @@
 //
 //   node metricas.mjs gravar --frentes=N --sessoes=X --reaproveitadas=Y --subagentes=W --prs=P
 //        --pico=M [--bastao=ENTREGA:INICIO:PASSOS ...] [--estado=<caminho>] [--skill=<caminho>]
-//        [--compactar-em=200]
+//        [--compactar-em=200] [--repos=dono/repo,dono/outro]
 //     A sessão principal roda pelo Bash a cada atualização do estado. Grava
 //     <config>/orquestrador/sessoes/<CLAUDE_CODE_SESSION_ID>.json e imprime a linha de métricas
-//     que vai no fim do quadro. Valores em mil tokens (k). `--estado`, `--skill` e
-//     `--compactar-em` ficam gravados: basta passar uma vez, no início do lote.
+//     que vai no fim do quadro. Valores em mil tokens (k). `--estado`, `--skill`,
+//     `--compactar-em` e `--repos` ficam gravados: basta passar uma vez, no início do lote.
+//     `--repos` lista onde o lote mescla ou publica; a faixa avisa se outra principal ativa
+//     registrou algum deles.
 //   node metricas.mjs decisao --frente=<nome> --pergunta=<texto> [--opcoes="sim|não"]
 //        [--contexto=<até 3 linhas>] [--relatorio=<caminho>] [--id=D3]
 //     Põe na fila uma decisão que um retorno de filha pede ao dono e imprime o id (D1, D2...).
@@ -62,6 +64,10 @@ const TXT = {
     semDecisao: (id) => `decisão ${id} não está na fila`,
     fila: (n) => (n ? `decisões pendentes (${n}):` : 'nenhuma decisão pendente'),
     rotulos: { decisao: 'decisão', de: 'de', frente: 'frente', anterior: '‹ anterior', proxima: 'próxima ›', responder: 'responder…', relatorio: 'relatório' },
+    naoRepassada: (ids) => `⚠ ${ids} respondida e ainda na fila: repasse à filha (SendMessage) neste turno e rode decidiu`,
+    lembrete: (d) => `[orquestrador] O dono respondeu ${d.id} (frente ${d.frente}). Neste mesmo turno: repasse à filha dona citando as palavras dele (SendMessage) e só então rode \`metricas.mjs decidiu --id=${d.id}\`.`,
+    outroLote: (r) => `⚠ outro lote ativo também mescla/publica em ${r}: confira o servidor e o main antes de cada merge ou deploy`,
+    auto: 'orquestrador: `gh pr merge --auto` bloqueado. Ele só espera checks obrigatórios; sem nenhum, mescla na hora. Use o mergeit de merge-ci.md (espera os checks e confere o SHA aprovado).',
   },
   en: {
     line: (m) => `metrics · fronts ${m.frentes} (sessions ${m.sessoes} · reused ${m.reaproveitadas} · subagents ${m.subagentes} · batons ${m.bastoes.length}) · PRs merged ${m.prs} · main peak ~${m.pico}k · estimated savings ~${fmt(m.economia.total)}k`,
@@ -83,6 +89,10 @@ const TXT = {
     semDecisao: (id) => `decision ${id} is not in the queue`,
     fila: (n) => (n ? `pending decisions (${n}):` : 'no pending decisions'),
     rotulos: { decisao: 'decision', de: 'of', frente: 'front', anterior: '‹ previous', proxima: 'next ›', responder: 'answer…', relatorio: 'report' },
+    naoRepassada: (ids) => `⚠ ${ids} answered and still queued: pass it to the child (SendMessage) this turn and run decidiu`,
+    lembrete: (d) => `[orchestrator] The owner answered ${d.id} (front ${d.frente}). In this same turn: pass it to the owning child quoting their words (SendMessage), then run \`metricas.mjs decidiu --id=${d.id}\`.`,
+    outroLote: (r) => `⚠ another active batch also merges/deploys in ${r}: check the server and main before each merge or deploy`,
+    auto: 'orchestrator: `gh pr merge --auto` blocked. It only waits for required checks; with none, it merges at once. Use mergeit from merge-ci.md (waits for checks and pins the approved SHA).',
   },
 }[lang];
 
@@ -159,6 +169,26 @@ function texto(o, k, max, obrigatorio = false) {
   return v.replace(/\s*[\r\n]+\s*/g, ' ');
 }
 
+function listaRepos(v) {
+  const l = v.split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+  if (l.length > 20 || l.some((x) => !/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/.test(x))) throw new Error(TXT.bad('repos', v));
+  return l;
+}
+
+// Repositórios deste lote que outra principal ativa (arquivo dentro da validade) também registrou.
+function emComum(id, m) {
+  const meus = new Set(m.repos || []);
+  if (!meus.size) return [];
+  const achados = new Set();
+  for (const nome of fs.readdirSync(dir())) {
+    if (!nome.endsWith('.json') || nome === `${id}.json`) continue;
+    const outro = ler(path.join(dir(), nome));
+    if (!outro || !(Date.now() - outro.at < VALIDADE_MS)) continue;
+    for (const r of outro.repos || []) if (meus.has(r)) achados.add(r);
+  }
+  return [...achados];
+}
+
 function sessaoAtual() {
   const f = arquivo(process.env.CLAUDE_CODE_SESSION_ID);
   if (!f) throw new Error(TXT.noSession);
@@ -211,6 +241,7 @@ function main() {
     m.skill = caminho(o, 'skill', antes.skill);
     m.compactarEm = o['compactar-em'] !== undefined ? inteiro(o, 'compactar-em') : antes.compactarEm ?? COMPACTAR_EM;
     m.compactacoes = antes.compactacoes || 0;
+    m.repos = o.repos !== undefined ? listaRepos(o.repos) : antes.repos || [];
     m.decisoes = antes.decisoes || [];
     m.proxDecisao = antes.proxDecisao || 1;
     salvar(f, { v: 2, lang, at: Date.now(), ...m });
@@ -241,6 +272,7 @@ function main() {
     const f = arquivo(o.session);
     const m = f && ler(f);
     if (!m || !(Date.now() - m.at < VALIDADE_MS)) return;
+    const comum = emComum(o.session, m);
     process.stdout.write(JSON.stringify({
       text: TXT.band(m),
       detail: TXT.detail(m),
@@ -249,6 +281,10 @@ function main() {
       aviso: TXT.aviso('%K'),
       decisoes: m.decisoes || [],
       rotulos: TXT.rotulos,
+      naoRepassada: TXT.naoRepassada('%IDS'),
+      lembretes: Object.fromEntries((m.decisoes || []).map((d) => [d.id, TXT.lembrete(d)])),
+      outroLote: comum.length ? TXT.outroLote(comum.join(', ')) : '',
+      auto: TXT.auto,
     }));
     return;
   }

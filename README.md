@@ -47,6 +47,13 @@ e não falam com você diretamente.
   ```
   O botão só **preenche o prompt** (`D1: sim`). Quem envia é você, com Enter, então a resposta
   continua sendo sua. A decisão só sai da fila depois que você responde.
+- **Travas contra erros vistos em uso real** (com o plugin, só na sessão principal):
+  - sua resposta `D3: …` chega com um lembrete para a principal repassar à filha **no mesmo
+    turno**; se a decisão ficar na fila, a faixa acusa em amarelo;
+  - `gh pr merge --auto` é recusado: sem check obrigatório no repositório, ele mescla na hora, sem
+    esperar o CI. O merge passa pelo script que espera os checks e confere o SHA aprovado;
+  - com `--repos`, a faixa avisa quando outro lote ativo mescla ou publica no mesmo repositório, e
+    a principal confere o servidor e o main antes de cada merge ou deploy.
 - **Métricas simples em toda rodada.** Instalada como plugin, a sessão principal ganha uma faixa
   acima do prompt, atualizada ao fim de cada turno:
   ```

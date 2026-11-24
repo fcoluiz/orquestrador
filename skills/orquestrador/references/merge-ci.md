@@ -18,6 +18,10 @@
 - Ordem pela tabela de dependências do estado. Empilhados só depois da base; antes, conferir que
   sobraram só os commits próprios (`gh api repos/<r>/compare/<prod>...<branch>` → `ahead_by`).
 - Usar o método do repositório (ex.: `gh pr merge --merge`).
+- **Nunca `gh pr merge --auto`** para "mesclar quando o CI passar": ele só espera checks
+  **obrigatórios**; num repositório sem nenhum, mescla na hora. O plugin recusa o comando. O
+  caminho é o `mergeit` abaixo, que espera os checks, para se não houver check verde e confere o
+  SHA aprovado.
 - Esperar e mesclar em segundo plano:
 
 ```bash
@@ -45,6 +49,13 @@ mergeit <repo> <n> <sha> && mergeit <repo> <m> <sha>
 - Pares back/front: mesclar o front de uma feature depois (ou junto) do back dela; anotar no estado.
 
 ## Deploy (só com pedido explícito do dono)
+- **Conferir antes, montar na hora.** Imediatamente antes de cada deploy: versão no servidor
+  (commit/tag/hash publicado) × ponta da branch × último deploy anotado no estado. Servidor com
+  algo que o estado não conhece (outro lote ou outra pessoa publicou) → parar e levar ao dono. A
+  sequência de deploy se monta a partir dessa conferência, nunca de instruções escritas antes.
+- Outro lote ativo no mesmo repositório (aviso na faixa, ou `--repos` em comum) → a mesma
+  conferência antes de cada merge também: `git fetch` e o que entrou no main desde o último merge
+  do lote.
 - Seguir o runbook do projeto (CLAUDE.md/docs). Padrão: backup do banco e conferir leitura →
   transporte (pull ou bundle verificado por SHA-256) com fast-forward em clone limpo → migrations
   pelo runner (ordem, ok do dono para DROP) → ativar cada ambiente separadamente (recarregar um

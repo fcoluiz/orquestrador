@@ -25,7 +25,10 @@ in every brief.
    without it, the batch runs with cards.
    Right after, register the session as the main one: `node "<skill folder>/scripts/metricas.mjs"
    gravar --estado="<state path>" --skill="<path of this SKILL.md>"` (turns on the band and the
-   automatic compaction at 200k; `--compactar-em=N` changes the limit).
+   automatic compaction at 200k; `--compactar-em=N` changes the limit). Also pass
+   `--repos=owner/repo,...` with the repositories where the batch will merge or deploy: if another
+   active main session registered any of them, the band warns, and before each merge or deploy
+   there the main session checks main and the server (`merge-ci.md`).
 2. Suggest the `permissions.md` allowlist to the owner if it is not applied yet (apply only with ok).
 3. Split into **independent** fronts (not touching the same files). Dependent fronts branch off the
    other's branch; record it in the dependency table.
@@ -128,9 +131,11 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
   --relatorio=<path>` (prints the id, `D1`, `D2`...). The message opens with the pending decisions
   (`metricas.mjs decisoes`), one per line with id and options; fronts that only report stay on the
   board. With the plugin, the band shows one decision at a time, and a button only fills the
-  prompt (`D2: yes`): the owner sends it. The owner's `Dn: …` answer → pass it to the child quoting
-  their words and `metricas.mjs decidiu --id=Dn`. A decision never leaves the queue without the
-  owner's answer.
+  prompt (`D2: yes`): the owner sends it. The owner's `Dn: …` answer → **in the same turn**, before
+  anything else: pass it to the child quoting their words (`SendMessage`), then
+  `metricas.mjs decidiu --id=Dn`. Never "I'll pass it on later". A decision never leaves the queue
+  without the owner's answer. With the plugin, the band flags in yellow an answered decision left
+  in the queue.
 - Close with: what came in, who waits on what and the next action.
 - And always with the **fronts board** at the end of the final message: one line per front not yet
   archived, **all of them, including those with no news**, always in the same order (the state
