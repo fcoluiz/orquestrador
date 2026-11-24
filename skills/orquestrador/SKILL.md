@@ -123,13 +123,19 @@ seção "Experimental". Recusado → o card acima, sem mudança.
 - **Fila de decisões.** Não repasse retorno de filha por inteiro. Cada coisa que um retorno pede ao
   dono vira uma decisão na fila: `node "<pasta da skill>/scripts/metricas.mjs" decisao
   --frente=<frente> --pergunta="<uma frase>" --opcoes="sim|não" --contexto="<até 3 linhas>"
-  --relatorio=<caminho>` (imprime o id, `D1`, `D2`...). A mensagem abre com as decisões pendentes
-  (`metricas.mjs decisoes`), uma por linha com id e opções; as frentes que só informam ficam no
-  quadro. Com o plugin, a faixa mostra uma decisão por vez, e o botão só preenche o prompt
-  (`D2: sim`): quem envia é o dono. Resposta `Dn: …` do dono → **no mesmo turno**, antes de
-  qualquer outra coisa: repassar à filha citando as palavras dele (`SendMessage`) e só então
-  `metricas.mjs decidiu --id=Dn`. Nunca "repasso depois". Decisão nunca sai da fila sem resposta
-  do dono. Com o plugin, a faixa acusa em amarelo a decisão respondida que ficou na fila.
+  --relatorio=<caminho>` (imprime o id, `D1`, `D2`...; de 2 a 4 opções). As frentes que só
+  informam ficam no quadro.
+- **Perguntar as decisões** no fim da rodada, depois do quadro, com a pergunta de múltipla escolha
+  do app (`AskUserQuestion`; sem ela, lista numerada no topo da mensagem): até 4 da fila
+  (`metricas.mjs decisoes`), as mais urgentes primeiro. Em cada pergunta: `header` = o id (`D3`),
+  `question` = `<frente>: <pergunta>`, `options` = as opções da fila, cada uma com `description`
+  (obrigatória: o contexto na primeira, o efeito da escolha nas outras). Não repetir as decisões em texto na mesma mensagem. O resto da fila
+  vai na rodada seguinte.
+- **Resposta do dono** (da pergunta, ou `Dn: …` digitado) → **no mesmo turno**, antes de qualquer
+  outra coisa: repassar à filha citando as palavras dele (`SendMessage`) e só então
+  `metricas.mjs decidiu --id=Dn`. Nunca "repasso depois". Pergunta sem resposta (o dono pulou)
+  fica na fila. Decisão nunca sai da fila sem resposta do dono. Com o plugin, a faixa mostra
+  quantas estão na fila e acusa em amarelo a perguntada que ficou nela no fim do turno.
 - Fechar com: o que entrou, quem espera o quê e a próxima ação.
 - E sempre com o **quadro das frentes**, no fim da mensagem final: uma linha por frente ainda não
   arquivada, **todas, inclusive as sem novidade**, sempre na mesma ordem (a da tabela do estado),

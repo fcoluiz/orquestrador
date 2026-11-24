@@ -128,14 +128,19 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
 - **Decision queue.** Don't relay a child's result whole. Everything a result asks of the owner
   becomes a decision in the queue: `node "<skill folder>/scripts/metricas.mjs" decisao
   --frente=<front> --pergunta="<one sentence>" --opcoes="yes|no" --contexto="<up to 3 lines>"
-  --relatorio=<path>` (prints the id, `D1`, `D2`...). The message opens with the pending decisions
-  (`metricas.mjs decisoes`), one per line with id and options; fronts that only report stay on the
-  board. With the plugin, the band shows one decision at a time, and a button only fills the
-  prompt (`D2: yes`): the owner sends it. The owner's `Dn: …` answer → **in the same turn**, before
+  --relatorio=<path>` (prints the id, `D1`, `D2`...; 2 to 4 options). Fronts that only report
+  stay on the board.
+- **Ask the decisions** at the end of the round, after the board, with the app's multiple-choice
+  question (`AskUserQuestion`; without it, a numbered list at the top of the message): up to 4 from
+  the queue (`metricas.mjs decisoes`), most urgent first. In each question: `header` = the id
+  (`D3`), `question` = `<front>: <question>`, `options` = the queue's options, each with a
+  `description` (required: the context on the first, what the choice leads to on the others). Don't repeat the decisions as text in the same message. The rest
+  of the queue goes in the next round.
+- **The owner's answer** (from the question, or a typed `Dn: …`) → **in the same turn**, before
   anything else: pass it to the child quoting their words (`SendMessage`), then
-  `metricas.mjs decidiu --id=Dn`. Never "I'll pass it on later". A decision never leaves the queue
-  without the owner's answer. With the plugin, the band flags in yellow an answered decision left
-  in the queue.
+  `metricas.mjs decidiu --id=Dn`. Never "I'll pass it on later". A skipped question stays queued.
+  A decision never leaves the queue without the owner's answer. With the plugin, the band shows
+  how many are queued and flags in yellow an asked one still queued at the end of the turn.
 - Close with: what came in, who waits on what and the next action.
 - And always with the **fronts board** at the end of the final message: one line per front not yet
   archived, **all of them, including those with no news**, always in the same order (the state

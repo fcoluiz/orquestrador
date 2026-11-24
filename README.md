@@ -37,19 +37,15 @@ e não falam com você diretamente.
 - **Quadro em toda rodada.** Cada resposta da principal termina com uma linha por frente (estado e
   quem espera o quê), para nenhuma sumir de vista por ter ficado quieta.
 - **Decisões em fila, não em textão.** Com 6 a 8 filhas, os retornos não chegam inteiros na
-  conversa. Cada coisa que pede a sua decisão vira um item numerado (D1, D2...) no topo da resposta.
-  Com o plugin, a faixa mostra **uma decisão por vez**, como um card:
-  ```
-  🎼 decisão 1 de 3 · D1 · frente filtro-datas                    [próxima ›]
-     O filtro deve incluir o dia final inteiro (até 23:59)?
-     hoje corta à meia-noite; 3 relatórios mudam
-     [sim] [não] [responder…]
-  ```
-  O botão só **preenche o prompt** (`D1: sim`). Quem envia é você, com Enter, então a resposta
-  continua sendo sua. A decisão só sai da fila depois que você responde.
+  conversa. Cada coisa que pede a sua decisão vira um item numerado (D1, D2...) numa fila. No fim
+  da rodada, a principal pergunta com a **pergunta de múltipla escolha do app**: até 4 decisões de
+  uma vez, uma por aba, cada uma com as opções e um campo para responder com as suas palavras. Você
+  passa de uma para a outra e envia tudo junto. A decisão só sai da fila depois que você responde;
+  as que passarem de 4 vêm na rodada seguinte. Funciona também sem o plugin.
 - **Travas contra erros vistos em uso real** (com o plugin, só na sessão principal):
-  - sua resposta `D3: …` chega com um lembrete para a principal repassar à filha **no mesmo
-    turno**; se a decisão ficar na fila, a faixa acusa em amarelo;
+  - a faixa mostra quantas decisões estão na fila; uma decisão já perguntada que continua nela no
+    fim do turno vira alerta amarelo, e a sua resposta digitada `D3: …` chega com um lembrete
+    para a principal repassar à filha **no mesmo turno**;
   - `gh pr merge --auto` é recusado: sem check obrigatório no repositório, ele mescla na hora, sem
     esperar o CI. O merge passa pelo script que espera os checks e confere o SHA aprovado;
   - com `--repos`, a faixa avisa quando outro lote ativo mescla ou publica no mesmo repositório, e

@@ -7,19 +7,19 @@
 // compacta com as instruções que mantêm os caminhos do estado do lote e da skill. Qualquer falha
 // só cala a faixa ou adia a compactação para o próximo turno, nunca derruba a sessão.
 //
-// Com decisões na fila (`metricas.mjs decisao`), a faixa vira um card por decisão, com ‹ › para
-// passar entre elas e um botão por opção. O botão só preenche o prompt ("D2: sim"); o dono envia.
+// As decisões do dono são perguntadas pela própria principal (AskUserQuestion, até 4 por vez, o
+// cabeçalho de cada pergunta é o id: "D3"); a faixa só mostra quantas estão na fila.
 //
-// Travas, só na principal com lote ativo: a resposta "Dn: …" do dono leva um lembrete de repassar
-// à filha no mesmo turno, e a faixa acusa a decisão respondida que ainda está na fila no fim do
-// turno; `gh pr merge --auto` é recusado (sem check obrigatório, ele mescla na hora); e a faixa
-// avisa quando outra principal ativa registrou o mesmo repositório (`gravar --repos`).
+// Travas, só na principal com lote ativo: decisão perguntada ou respondida ("D3: …" digitado) que
+// segue na fila no fim do turno vira alerta amarelo, e a resposta digitada leva um lembrete de
+// repassar à filha no mesmo turno; `gh pr merge --auto` é recusado (sem check obrigatório, ele
+// mescla na hora); e a faixa avisa quando outra principal ativa registrou o mesmo repositório
+// (`gravar --repos`).
 import type { EngineInterface, Register } from 'claude-code'
 
 const SCRIPT = 'skills/orchestrator/scripts/metricas.mjs'
 
-type Decisao = { id: string; frente: string; pergunta: string; opcoes: string[]; contexto?: string; relatorio?: string }
-type Rotulos = { decisao: string; de: string; frente: string; anterior: string; proxima: string; responder: string; relatorio: string }
+type Decisao = { id: string; frente: string; pergunta: string; opcoes: string[] }
 type Dados = {
   text: string
   detail?: string
@@ -27,7 +27,7 @@ type Dados = {
   instrucoes?: string
   aviso?: string
   decisoes?: Decisao[]
-  rotulos?: Rotulos
+  pendentes?: string
   naoRepassada?: string
   lembretes?: Record<string, string>
   outroLote?: string
@@ -36,10 +36,11 @@ type Dados = {
 
 let faixa: Dados | null = null
 let compactando = false
-let indice = 0 // decisão mostrada no card; os botões ‹ › a mudam
-const respondidas = new Set<string>() // ids que o dono respondeu nesta sessão
+const respondidas = new Set<string>() // ids que o dono já viu perguntados ou respondeu
+let cobrar: string[] = [] // respondidas que seguiam na fila no fim do turno: alerta amarelo
 
 const MERGE_AUTO = /\bgh\s+pr\s+merge\b[^\n]*\s--auto\b/
+const ID = /\b(D\d+)\b/
 
 export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
@@ -48,7 +49,7 @@ export const register: Register = on => {
     return result
   })
 
-  // Resposta "D3: …" do dono: lembrete à principal de repassar no mesmo turno.
+  // Resposta "D3: …" digitada pelo dono: lembrete à principal de repassar no mesmo turno.
   on('prompt.submit', ($, e, next) => {
     if (e.isMeta || e.command || !faixa?.lembretes) return next(e)
     const ids = [...e.text.matchAll(/\b(D\d+)\s*:/g)].map(m => m[1]).filter(id => faixa?.lembretes?.[id])
@@ -56,6 +57,18 @@ export const register: Register = on => {
     for (const id of ids) respondidas.add(id)
     const notas = ids.map(id => faixa?.lembretes?.[id] ?? '')
     return next({ ...e, context: [...(e.context ?? []), ...notas] })
+  })
+
+  // Decisões perguntadas pela principal: o cabeçalho de cada pergunta é o id.
+  on('tool.call', { tool: 'AskUserQuestion' }, async ($, e, next) => {
+    const ran = await next(e)
+    if (ran.deny === undefined && ran.isError !== true && faixa?.decisoes) {
+      for (const q of e.questions) {
+        const id = (ID.exec(q.header) ?? ID.exec(q.question))?.[1]
+        if (id && faixa.decisoes.some(x => x.id === id)) respondidas.add(id)
+      }
+    }
+    return ran
   })
 
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
@@ -66,62 +79,19 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || faixa === null) return next(e)
-    const { Box, Button, Text } = $.ui.resolve(e)
-    const fila = faixa.decisoes ?? []
-    const r = faixa.rotulos
-    const pendentes = fila.filter(x => respondidas.has(x.id)).map(x => x.id)
-    const alertas = (
+    const { Box, Text } = $.ui.resolve(e)
+    return (
       <Box flexDirection="column">
-        {pendentes.length && faixa.naoRepassada ? (
-          <Text color="yellow">{faixa.naoRepassada.replace('%IDS', pendentes.join(', '))}</Text>
+        {cobrar.length && faixa.naoRepassada ? (
+          <Text color="yellow">{faixa.naoRepassada.replace('%IDS', cobrar.join(', '))}</Text>
         ) : null}
         {faixa.outroLote ? <Text color="yellow">{faixa.outroLote}</Text> : null}
-      </Box>
-    )
-    const metricas = (
-      <Box flexDirection="column">
-        {alertas}
+        {faixa.pendentes ? <Text>{faixa.pendentes}</Text> : null}
         <Text dimColor>{faixa.text}</Text>
         {faixa.detail ? <Text dimColor>{faixa.detail}</Text> : null}
       </Box>
     )
-    if (!fila.length || !r) return metricas
-
-    indice = Math.min(Math.max(indice, 0), fila.length - 1)
-    const d = fila[indice]
-    const mover = (passo: number) => {
-      indice = Math.min(Math.max(indice + passo, 0), fila.length - 1)
-      $.ui.invalidate('ui.render')
-    }
-    // O clique só preenche o prompt: quem envia é o dono, com Enter, e a resposta é dele.
-    const preencher = (texto: string) => $.prompt.fill({ text: texto, mode: 'replace' })
-    return (
-      <Box flexDirection="column">
-        {alertas}
-        <Box alignItems="center" columnGap="xs">
-          <Text bold wrap="truncate-end">{`🎼 ${r.decisao} ${indice + 1} ${r.de} ${fila.length} · ${d.id} · ${r.frente} ${d.frente}  `}</Text>
-          {indice > 0 ? <Button key="ant" label={r.anterior} onPress={() => mover(-1)} /> : null}
-          {indice < fila.length - 1 ? <Button key="prox" label={r.proxima} onPress={() => mover(1)} /> : null}
-        </Box>
-        <Text>{`   ${d.pergunta}`}</Text>
-        {d.contexto ? <Text dimColor wrap="truncate-end">{`   ${d.contexto}`}</Text> : null}
-        {/* só o nome do arquivo: caminho longo quebrava a linha e os botões cobriam o texto */}
-        {d.relatorio ? <Text dimColor wrap="truncate-end">{`   ${r.relatorio}: ${nomeArquivo(d.relatorio)}`}</Text> : null}
-        <Box marginTop="xs" marginBottom="xs" paddingLeft={3} columnGap="xs" alignItems="center">
-          {d.opcoes.map((op, i) => (
-            <Button key={`op-${d.id}-${i}`} label={op} onPress={() => preencher(`${d.id}: ${op}`)} />
-          ))}
-          <Button key={`resp-${d.id}`} label={r.responder} onPress={() => preencher(`${d.id}: `)} />
-        </Box>
-        {/* com card na tela, as métricas ficam numa linha só, para a faixa não crescer */}
-        <Text dimColor>{faixa.text}</Text>
-      </Box>
-    )
   })
-}
-
-function nomeArquivo(p: string) {
-  return p.split(/[\/]/).pop() || p
 }
 
 async function rodar($: EngineInterface, args: string[]) {
@@ -140,6 +110,10 @@ async function atualizar($: EngineInterface) {
   const novo = await carregar($)
   // decisão que saiu da fila já foi repassada: esquece
   for (const id of [...respondidas]) if (!novo?.decisoes?.some(x => x.id === id)) respondidas.delete(id)
+  // o turno acabou e a decisão perguntada ou respondida segue na fila: a principal não repassou
+  const antes = cobrar.join()
+  cobrar = [...respondidas]
+  if (cobrar.join() !== antes) $.ui.invalidate('ui.render')
   if (JSON.stringify(novo) !== JSON.stringify(faixa)) {
     faixa = novo
     $.ui.invalidate('ui.render')

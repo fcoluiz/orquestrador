@@ -10,14 +10,14 @@
 //     `--compactar-em` e `--repos` ficam gravados: basta passar uma vez, no início do lote.
 //     `--repos` lista onde o lote mescla ou publica; a faixa avisa se outra principal ativa
 //     registrou algum deles.
-//   node metricas.mjs decisao --frente=<nome> --pergunta=<texto> [--opcoes="sim|não"]
+//   node metricas.mjs decisao --frente=<nome> --pergunta=<texto> --opcoes="sim|não"
 //        [--contexto=<até 3 linhas>] [--relatorio=<caminho>] [--id=D3]
 //     Põe na fila uma decisão que um retorno de filha pede ao dono e imprime o id (D1, D2...).
-//     O mesmo id substitui a decisão.
+//     De 2 a 4 opções. O mesmo id substitui a decisão.
 //   node metricas.mjs decidiu --id=D3
 //     Tira a decisão da fila, depois que o dono respondeu.
 //   node metricas.mjs decisoes
-//     Lista a fila (vai no topo da resposta da principal).
+//     Lista a fila, com contexto e relatório, para montar a pergunta de múltipla escolha.
 //   node metricas.mjs faixa --session=<id>
 //     Usado pela faixa acima do prompt (hooks/faixa.tsx): imprime o JSON da faixa e da
 //     compactação automática, ou nada quando a sessão não é uma principal com lote ativo.
@@ -63,8 +63,8 @@ const TXT = {
     usage: 'uso: metricas.mjs gravar|decisao|decidiu|decisoes|faixa|compactou|instrucoes|fim [opções]',
     semDecisao: (id) => `decisão ${id} não está na fila`,
     fila: (n) => (n ? `decisões pendentes (${n}):` : 'nenhuma decisão pendente'),
-    rotulos: { decisao: 'decisão', de: 'de', frente: 'frente', anterior: '‹ anterior', proxima: 'próxima ›', responder: 'responder…', relatorio: 'relatório' },
-    naoRepassada: (ids) => `⚠ ${ids} respondida e ainda na fila: repasse à filha (SendMessage) neste turno e rode decidiu`,
+    pendentes: (ids) => `🎼 ${ids.length} ${ids.length === 1 ? 'decisão' : 'decisões'} na fila (${ids.join(', ')}): a principal pergunta no fim da rodada`,
+    naoRepassada: (ids) => `⚠ ${ids} já perguntada ao dono e ainda na fila: repasse a resposta à filha (SendMessage) e rode decidiu`,
     lembrete: (d) => `[orquestrador] O dono respondeu ${d.id} (frente ${d.frente}). Neste mesmo turno: repasse à filha dona citando as palavras dele (SendMessage) e só então rode \`metricas.mjs decidiu --id=${d.id}\`.`,
     outroLote: (r) => `⚠ outro lote ativo também mescla/publica em ${r}: confira o servidor e o main antes de cada merge ou deploy`,
     auto: 'orquestrador: `gh pr merge --auto` bloqueado. Ele só espera checks obrigatórios; sem nenhum, mescla na hora. Use o mergeit de merge-ci.md (espera os checks e confere o SHA aprovado).',
@@ -88,8 +88,8 @@ const TXT = {
     usage: 'usage: metricas.mjs gravar|decisao|decidiu|decisoes|faixa|compactou|instrucoes|fim [options]',
     semDecisao: (id) => `decision ${id} is not in the queue`,
     fila: (n) => (n ? `pending decisions (${n}):` : 'no pending decisions'),
-    rotulos: { decisao: 'decision', de: 'of', frente: 'front', anterior: '‹ previous', proxima: 'next ›', responder: 'answer…', relatorio: 'report' },
-    naoRepassada: (ids) => `⚠ ${ids} answered and still queued: pass it to the child (SendMessage) this turn and run decidiu`,
+    pendentes: (ids) => `🎼 ${ids.length} ${ids.length === 1 ? 'decision' : 'decisions'} queued (${ids.join(', ')}): the main session asks at the end of the round`,
+    naoRepassada: (ids) => `⚠ ${ids} already asked of the owner and still queued: pass the answer to the child (SendMessage) and run decidiu`,
     lembrete: (d) => `[orchestrator] The owner answered ${d.id} (front ${d.frente}). In this same turn: pass it to the owning child quoting their words (SendMessage), then run \`metricas.mjs decidiu --id=${d.id}\`.`,
     outroLote: (r) => `⚠ another active batch also merges/deploys in ${r}: check the server and main before each merge or deploy`,
     auto: 'orchestrator: `gh pr merge --auto` blocked. It only waits for required checks; with none, it merges at once. Use mergeit from merge-ci.md (waits for checks and pins the approved SHA).',
@@ -200,14 +200,15 @@ function salvar(f, m) {
   fs.writeFileSync(f, JSON.stringify(m, null, 2));
 }
 
-// Fila de decisões do dono: a principal registra o que um retorno de filha pede a ele, e a faixa
-// mostra uma decisão por vez. Sai da fila só com `decidiu`, depois da resposta do dono.
+// Fila de decisões do dono: a principal registra o que um retorno de filha pede a ele e, no fim
+// da rodada, pergunta até 4 de uma vez (AskUserQuestion: 2 a 4 opções por pergunta). Sai da fila
+// só com `decidiu`, depois da resposta do dono.
 function decisao(o) {
   const f = sessaoAtual();
   const m = ler(f) || { v: 2, lang, ...calcular({ bastao: [] }), compactarEm: COMPACTAR_EM, compactacoes: 0 };
   const fila = m.decisoes || [];
   const opcoes = (o.opcoes ?? '').split('|').map((s) => s.trim()).filter(Boolean);
-  if (opcoes.length > 4 || opcoes.some((s) => s.length > 40)) throw new Error(TXT.bad('opcoes', o.opcoes));
+  if (opcoes.length < 2 || opcoes.length > 4 || opcoes.some((s) => s.length > 40)) throw new Error(TXT.bad('opcoes', o.opcoes));
   const id = o.id ? texto(o, 'id', 10) : `D${m.proxDecisao || 1}`;
   if (!/^[A-Za-z0-9]{1,10}$/.test(id)) throw new Error(TXT.bad('id', id));
   const d = {
@@ -265,6 +266,8 @@ function main() {
     console.log(TXT.fila(fila.length));
     for (const d of fila) {
       console.log(`${d.id} [${d.frente}] ${d.pergunta}` + (d.opcoes.length ? ` (${d.opcoes.join(' / ')})` : ''));
+      if (d.contexto) console.log(`   ${d.contexto}`);
+      if (d.relatorio) console.log(`   ${d.relatorio}`);
     }
     return;
   }
@@ -280,7 +283,7 @@ function main() {
       instrucoes: TXT.instr(m),
       aviso: TXT.aviso('%K'),
       decisoes: m.decisoes || [],
-      rotulos: TXT.rotulos,
+      pendentes: (m.decisoes || []).length ? TXT.pendentes(m.decisoes.map((d) => d.id)) : '',
       naoRepassada: TXT.naoRepassada('%IDS'),
       lembretes: Object.fromEntries((m.decisoes || []).map((d) => [d.id, TXT.lembrete(d)])),
       outroLote: comum.length ? TXT.outroLote(comum.join(', ')) : '',

@@ -41,19 +41,16 @@ talk to you directly.
 - **A board every round.** Every reply from the main session ends with one line per front (state
   and who waits on what), so no front drops out of sight by going quiet.
 - **Decisions in a queue, not in a wall of text.** With 6 to 8 children, results don't land in the
-  conversation whole. Everything that needs your decision becomes a numbered item (D1, D2...) at the
-  top of the reply. With the plugin, the band shows **one decision at a time**, as a card:
-  ```
-  🎼 decision 1 of 3 · D1 · front date-filter                       [next ›]
-     Should the filter include the whole end day (until 23:59)?
-     today it cuts at midnight; 3 reports change
-     [yes] [no] [answer…]
-  ```
-  A button only **fills the prompt** (`D1: yes`). You send it with Enter, so the answer is still
-  yours. A decision leaves the queue only after you answer.
+  conversation whole. Everything that needs your decision becomes a numbered item (D1, D2...) in a
+  queue. At the end of the round, the main session asks with the **app's multiple-choice
+  question**: up to 4 decisions at once, one per tab, each with its options and a field to answer
+  in your own words. You move from one to the next and send them all together. A decision leaves
+  the queue only after you answer; beyond 4, they come in the next round. Works without the plugin
+  too.
 - **Guards against mistakes seen in real use** (with the plugin, main session only):
-  - your `D3: …` answer arrives with a reminder for the main session to pass it to the child **in
-    the same turn**; if the decision stays queued, the band flags it in yellow;
+  - the band shows how many decisions are queued; one already asked that is still queued at the
+    end of the turn becomes a yellow alert, and your typed `D3: …` answer arrives with a reminder
+    for the main session to pass it to the child **in the same turn**;
   - `gh pr merge --auto` is refused: with no required check in the repository, it merges at once
     without waiting for CI. Merges go through the script that waits for checks and pins the
     approved SHA;
