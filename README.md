@@ -36,6 +36,17 @@ e não falam com você diretamente.
 - **"Pronto" conferido.** Toda entrega de filha é verificada no git/GitHub antes de chegar a você.
 - **Quadro em toda rodada.** Cada resposta da principal termina com uma linha por frente (estado e
   quem espera o quê), para nenhuma sumir de vista por ter ficado quieta.
+- **Decisões em fila, não em textão.** Com 6 a 8 filhas, os retornos não chegam inteiros na
+  conversa. Cada coisa que pede a sua decisão vira um item numerado (D1, D2...) no topo da resposta.
+  Com o plugin, a faixa mostra **uma decisão por vez**, como um card:
+  ```
+  🎼 decisão 1 de 3 · D1 · frente filtro-datas                    [próxima ›]
+     O filtro deve incluir o dia final inteiro (até 23:59)?
+     hoje corta à meia-noite; 3 relatórios mudam
+     [sim] [não] [responder…]
+  ```
+  O botão só **preenche o prompt** (`D1: sim`). Quem envia é você, com Enter, então a resposta
+  continua sendo sua. A decisão só sai da fila depois que você responde.
 - **Métricas simples em toda rodada.** Instalada como plugin, a sessão principal ganha uma faixa
   acima do prompt, atualizada ao fim de cada turno:
   ```

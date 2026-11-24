@@ -6,14 +6,28 @@
 // turno da principal: redesenha a faixa e, com o contexto em `compactarEm` (padrão 200k) ou mais,
 // compacta com as instruções que mantêm os caminhos do estado do lote e da skill. Qualquer falha
 // só cala a faixa ou adia a compactação para o próximo turno, nunca derruba a sessão.
+//
+// Com decisões na fila (`metricas.mjs decisao`), a faixa vira um card por decisão, com ‹ › para
+// passar entre elas e um botão por opção. O botão só preenche o prompt ("D2: sim"); o dono envia.
 import type { EngineInterface, Register } from 'claude-code'
 
 const SCRIPT = 'skills/orquestrador/scripts/metricas.mjs'
 
-type Dados = { text: string; detail?: string; compactarEm?: number; instrucoes?: string; aviso?: string }
+type Decisao = { id: string; frente: string; pergunta: string; opcoes: string[]; contexto?: string; relatorio?: string }
+type Rotulos = { decisao: string; de: string; frente: string; anterior: string; proxima: string; responder: string; relatorio: string }
+type Dados = {
+  text: string
+  detail?: string
+  compactarEm?: number
+  instrucoes?: string
+  aviso?: string
+  decisoes?: Decisao[]
+  rotulos?: Rotulos
+}
 
 let faixa: Dados | null = null
 let compactando = false
+let indice = 0 // decisão mostrada no card; os botões ‹ › a mudam
 
 export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
@@ -24,11 +38,44 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey || faixa === null) return next(e)
-    const { Box, Text } = $.ui.resolve(e)
-    return (
+    const { Box, Button, Text } = $.ui.resolve(e)
+    const fila = faixa.decisoes ?? []
+    const r = faixa.rotulos
+    const metricas = (
       <Box flexDirection="column">
         <Text dimColor>{faixa.text}</Text>
         {faixa.detail ? <Text dimColor>{faixa.detail}</Text> : null}
+      </Box>
+    )
+    if (!fila.length || !r) return metricas
+
+    indice = Math.min(Math.max(indice, 0), fila.length - 1)
+    const d = fila[indice]
+    const mover = (passo: number) => {
+      indice = Math.min(Math.max(indice + passo, 0), fila.length - 1)
+      $.ui.invalidate('ui.render')
+    }
+    // O clique só preenche o prompt: quem envia é o dono, com Enter, e a resposta é dele.
+    const preencher = (texto: string) => $.prompt.fill({ text: texto, mode: 'replace' })
+    return (
+      <Box flexDirection="column">
+        <Box>
+          <Text bold>{`🎼 ${r.decisao} ${indice + 1} ${r.de} ${fila.length} · ${d.id} · ${r.frente} ${d.frente}  `}</Text>
+          {indice > 0 ? <Button key="ant" label={r.anterior} onPress={() => mover(-1)} /> : null}
+          {indice < fila.length - 1 ? <Button key="prox" label={r.proxima} onPress={() => mover(1)} /> : null}
+        </Box>
+        <Text>{`   ${d.pergunta}`}</Text>
+        {d.contexto ? <Text dimColor>{`   ${d.contexto}`}</Text> : null}
+        {d.relatorio ? <Text dimColor>{`   ${r.relatorio}: ${d.relatorio}`}</Text> : null}
+        <Box>
+          <Text>{'   '}</Text>
+          {d.opcoes.map((op, i) => (
+            <Button key={`op-${d.id}-${i}`} label={op} onPress={() => preencher(`${d.id}: ${op}`)} />
+          ))}
+          <Button key={`resp-${d.id}`} label={r.responder} onPress={() => preencher(`${d.id}: `)} />
+        </Box>
+        {/* com card na tela, as métricas ficam numa linha só, para a faixa não crescer */}
+        <Text dimColor>{faixa.text}</Text>
       </Box>
     )
   })

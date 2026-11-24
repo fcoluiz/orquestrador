@@ -117,8 +117,15 @@ seção "Experimental". Recusado → o card acima, sem mudança.
 - Filhas paradas sem motivo (`get_session`: sem atividade) → podem estar num prompt de permissão:
   avisar o dono qual sessão espera aprovação.
 - Bastões e cards pendentes (reemitir card perto de 7 dias).
-- Fechar com: o que entrou, quem espera o quê, próxima ação, e uma pergunta única se algo depende
-  do dono.
+- **Fila de decisões.** Não repasse retorno de filha por inteiro. Cada coisa que um retorno pede ao
+  dono vira uma decisão na fila: `node "<pasta da skill>/scripts/metricas.mjs" decisao
+  --frente=<frente> --pergunta="<uma frase>" --opcoes="sim|não" --contexto="<até 3 linhas>"
+  --relatorio=<caminho>` (imprime o id, `D1`, `D2`...). A mensagem abre com as decisões pendentes
+  (`metricas.mjs decisoes`), uma por linha com id e opções; as frentes que só informam ficam no
+  quadro. Com o plugin, a faixa mostra uma decisão por vez, e o botão só preenche o prompt
+  (`D2: sim`): quem envia é o dono. Resposta `Dn: …` do dono → repassar à filha citando as
+  palavras dele e `metricas.mjs decidiu --id=Dn`. Decisão nunca sai da fila sem resposta do dono.
+- Fechar com: o que entrou, quem espera o quê e a próxima ação.
 - E sempre com o **quadro das frentes**, no fim da mensagem final: uma linha por frente ainda não
   arquivada, **todas, inclusive as sem novidade**, sempre na mesma ordem (a da tabela do estado),
   no formato `frente · estado · espera o quê, de quem`. Frente sem novidade nesta rodada leva

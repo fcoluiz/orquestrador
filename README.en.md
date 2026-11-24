@@ -40,6 +40,17 @@ talk to you directly.
 - **"Done" is verified.** Every child's delivery is checked in git/GitHub before it reaches you.
 - **A board every round.** Every reply from the main session ends with one line per front (state
   and who waits on what), so no front drops out of sight by going quiet.
+- **Decisions in a queue, not in a wall of text.** With 6 to 8 children, results don't land in the
+  conversation whole. Everything that needs your decision becomes a numbered item (D1, D2...) at the
+  top of the reply. With the plugin, the band shows **one decision at a time**, as a card:
+  ```
+  🎼 decision 1 of 3 · D1 · front date-filter                       [next ›]
+     Should the filter include the whole end day (until 23:59)?
+     today it cuts at midnight; 3 reports change
+     [yes] [no] [answer…]
+  ```
+  A button only **fills the prompt** (`D1: yes`). You send it with Enter, so the answer is still
+  yours. A decision leaves the queue only after you answer.
 - **Simple metrics every round.** Installed as a plugin, the main session gets a band above the
   prompt, refreshed at the end of every turn:
   ```

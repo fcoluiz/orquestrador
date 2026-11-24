@@ -122,8 +122,16 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
 - Children idle for no reason (`get_session`: no activity) → may be stuck on a permission prompt:
   tell the owner which session is waiting for approval.
 - Pending batons and cards (re-issue a card close to 7 days).
-- Close with: what came in, who waits on what, next action, and a single question if something
-  depends on the owner.
+- **Decision queue.** Don't relay a child's result whole. Everything a result asks of the owner
+  becomes a decision in the queue: `node "<skill folder>/scripts/metricas.mjs" decisao
+  --frente=<front> --pergunta="<one sentence>" --opcoes="yes|no" --contexto="<up to 3 lines>"
+  --relatorio=<path>` (prints the id, `D1`, `D2`...). The message opens with the pending decisions
+  (`metricas.mjs decisoes`), one per line with id and options; fronts that only report stay on the
+  board. With the plugin, the band shows one decision at a time, and a button only fills the
+  prompt (`D2: yes`): the owner sends it. The owner's `Dn: …` answer → pass it to the child quoting
+  their words and `metricas.mjs decidiu --id=Dn`. A decision never leaves the queue without the
+  owner's answer.
+- Close with: what came in, who waits on what and the next action.
 - And always with the **fronts board** at the end of the final message: one line per front not yet
   archived, **all of them, including those with no news**, always in the same order (the state
   table's), in the format `front · state · waiting on what, from whom`. A front with no news this

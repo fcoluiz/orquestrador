@@ -1,7 +1,7 @@
 {
   "name": "orchestrator",
   "description": "English edition of orquestrador. Session orchestration for the Claude desktop app (Code tab): one main session splits the work into independent fronts and drives child sessions through brief, context handoff, PR, merge with green CI and archiving.",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "author": {
     "name": "Luiz Nogueira"
   },
