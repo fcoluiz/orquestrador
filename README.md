@@ -42,13 +42,13 @@ e não falam com você diretamente.
   uma vez, uma por aba, cada uma com as opções e um campo para responder com as suas palavras. Você
   passa de uma para a outra e envia tudo junto. A decisão só sai da fila depois que você responde;
   as que passarem de 4 vêm na rodada seguinte. Funciona também sem o plugin.
-- **Travas contra erros vistos em uso real** (com o plugin, só na sessão principal):
-  - a faixa mostra quantas decisões estão na fila; uma decisão já perguntada que continua nela no
-    fim do turno vira alerta amarelo, e a sua resposta digitada `D3: …` chega com um lembrete
-    para a principal repassar à filha **no mesmo turno**;
+- **Travas contra erros vistos em uso real** (com o plugin, só na sessão principal). Os avisos vão
+  para a principal, junto com a sua mensagem seguinte, e não ocupam a faixa:
+  - uma decisão já perguntada que continua na fila gera um aviso para a principal repassar à filha,
+    e a sua resposta digitada `D3: …` chega com o lembrete de repassar **no mesmo turno**;
   - `gh pr merge --auto` é recusado: sem check obrigatório no repositório, ele mescla na hora, sem
     esperar o CI. O merge passa pelo script que espera os checks e confere o SHA aprovado;
-  - com `--repos`, a faixa avisa quando outro lote ativo mescla ou publica no mesmo repositório, e
+  - com `--repos`, a principal é avisada quando outro lote ativo mescla ou publica no mesmo repositório, e
     a principal confere o servidor e o main antes de cada merge ou deploy.
 - **Métricas simples em toda rodada.** Instalada como plugin, a sessão principal ganha uma faixa
   acima do prompt, atualizada ao fim de cada turno:

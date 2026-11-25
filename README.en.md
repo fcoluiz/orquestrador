@@ -47,14 +47,14 @@ talk to you directly.
   in your own words. You move from one to the next and send them all together. A decision leaves
   the queue only after you answer; beyond 4, they come in the next round. Works without the plugin
   too.
-- **Guards against mistakes seen in real use** (with the plugin, main session only):
-  - the band shows how many decisions are queued; one already asked that is still queued at the
-    end of the turn becomes a yellow alert, and your typed `D3: …` answer arrives with a reminder
-    for the main session to pass it to the child **in the same turn**;
+- **Guards against mistakes seen in real use** (with the plugin, main session only). The warnings
+  go to the main session with your next message and take no room in the band:
+  - a decision already asked that is still queued triggers a warning to pass it to the child, and
+    your typed `D3: …` answer arrives with a reminder to pass it on **in the same turn**;
   - `gh pr merge --auto` is refused: with no required check in the repository, it merges at once
     without waiting for CI. Merges go through the script that waits for checks and pins the
     approved SHA;
-  - with `--repos`, the band warns when another active batch merges or deploys in the same
+  - with `--repos`, the main session is warned when another active batch merges or deploys in the same
     repository, and the main session checks the server and main before each merge or deploy.
 - **Simple metrics every round.** Installed as a plugin, the main session gets a band above the
   prompt, refreshed at the end of every turn:

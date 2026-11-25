@@ -7,14 +7,13 @@
 // compacta com as instruções que mantêm os caminhos do estado do lote e da skill. Qualquer falha
 // só cala a faixa ou adia a compactação para o próximo turno, nunca derruba a sessão.
 //
-// As decisões do dono são perguntadas pela própria principal (AskUserQuestion, até 4 por vez, o
-// cabeçalho de cada pergunta é o id: "D3"); a faixa só mostra quantas estão na fila.
+// A faixa mostra só as métricas. As decisões do dono são perguntadas pela própria principal
+// (AskUserQuestion, até 4 por vez, o cabeçalho de cada pergunta é o id: "D3").
 //
-// Travas, só na principal com lote ativo: decisão perguntada ou respondida ("D3: …" digitado) que
-// segue na fila no fim do turno vira alerta amarelo, e a resposta digitada leva um lembrete de
-// repassar à filha no mesmo turno; `gh pr merge --auto` é recusado (sem check obrigatório, ele
-// mescla na hora); e a faixa avisa quando outra principal ativa registrou o mesmo repositório
-// (`gravar --repos`).
+// Travas, só na principal com lote ativo, entregues à principal junto com a próxima mensagem do
+// dono: decisão perguntada ou respondida que seguiu na fila no fim do turno, lembrete de repassar a
+// resposta "D3: …" digitada, e outra principal ativa no mesmo repositório (`gravar --repos`).
+// `gh pr merge --auto` é recusado (sem check obrigatório, ele mescla na hora).
 import type { EngineInterface, Register } from 'claude-code'
 
 const SCRIPT = 'skills/orquestrador/scripts/metricas.mjs'
@@ -27,7 +26,6 @@ type Dados = {
   instrucoes?: string
   aviso?: string
   decisoes?: Decisao[]
-  pendentes?: string
   naoRepassada?: string
   lembretes?: Record<string, string>
   outroLote?: string
@@ -37,7 +35,8 @@ type Dados = {
 let faixa: Dados | null = null
 let compactando = false
 const respondidas = new Set<string>() // ids que o dono já viu perguntados ou respondeu
-let cobrar: string[] = [] // respondidas que seguiam na fila no fim do turno: alerta amarelo
+let cobrar: string[] = [] // respondidas que seguiam na fila no fim do turno: aviso à principal
+let avisado = '' // último aviso de outro lote já entregue à principal
 
 const MERGE_AUTO = /\bgh\s+pr\s+merge\b[^\n]*\s--auto\b/
 const ID = /\b(D\d+)\b/
@@ -49,14 +48,22 @@ export const register: Register = on => {
     return result
   })
 
-  // Resposta "D3: …" digitada pelo dono: lembrete à principal de repassar no mesmo turno.
+  // Os avisos vão para a principal junto com a mensagem do dono, não para a faixa: lembrete de
+  // repassar a resposta "D3: …" digitada, decisão perguntada que ficou na fila no turno anterior e
+  // outro lote no mesmo repositório (só quando o aviso muda, para não repetir a cada mensagem).
   on('prompt.submit', ($, e, next) => {
-    if (e.isMeta || e.command || !faixa?.lembretes) return next(e)
+    if (e.isMeta || e.command || !faixa) return next(e)
+    const notas: string[] = []
     const ids = [...e.text.matchAll(/\b(D\d+)\s*:/g)].map(m => m[1]).filter(id => faixa?.lembretes?.[id])
-    if (!ids.length) return next(e)
-    for (const id of ids) respondidas.add(id)
-    const notas = ids.map(id => faixa?.lembretes?.[id] ?? '')
-    return next({ ...e, context: [...(e.context ?? []), ...notas] })
+    for (const id of ids) {
+      respondidas.add(id)
+      notas.push(faixa.lembretes?.[id] ?? '')
+    }
+    const atrasadas = cobrar.filter(id => !ids.includes(id))
+    if (atrasadas.length && faixa.naoRepassada) notas.push(faixa.naoRepassada.replace('%IDS', atrasadas.join(', ')))
+    if (faixa.outroLote && faixa.outroLote !== avisado) notas.push(faixa.outroLote)
+    avisado = faixa.outroLote ?? ''
+    return notas.length ? next({ ...e, context: [...(e.context ?? []), ...notas] }) : next(e)
   })
 
   // Decisões perguntadas pela principal: o cabeçalho de cada pergunta é o id.
@@ -82,11 +89,6 @@ export const register: Register = on => {
     const { Box, Text } = $.ui.resolve(e)
     return (
       <Box flexDirection="column">
-        {cobrar.length && faixa.naoRepassada ? (
-          <Text color="yellow">{faixa.naoRepassada.replace('%IDS', cobrar.join(', '))}</Text>
-        ) : null}
-        {faixa.outroLote ? <Text color="yellow">{faixa.outroLote}</Text> : null}
-        {faixa.pendentes ? <Text>{faixa.pendentes}</Text> : null}
         <Text dimColor>{faixa.text}</Text>
         {faixa.detail ? <Text dimColor>{faixa.detail}</Text> : null}
       </Box>
@@ -111,9 +113,7 @@ async function atualizar($: EngineInterface) {
   // decisão que saiu da fila já foi repassada: esquece
   for (const id of [...respondidas]) if (!novo?.decisoes?.some(x => x.id === id)) respondidas.delete(id)
   // o turno acabou e a decisão perguntada ou respondida segue na fila: a principal não repassou
-  const antes = cobrar.join()
   cobrar = [...respondidas]
-  if (cobrar.join() !== antes) $.ui.invalidate('ui.render')
   if (JSON.stringify(novo) !== JSON.stringify(faixa)) {
     faixa = novo
     $.ui.invalidate('ui.render')

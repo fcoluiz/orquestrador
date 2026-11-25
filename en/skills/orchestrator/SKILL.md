@@ -27,7 +27,7 @@ in every brief.
    gravar --estado="<state path>" --skill="<path of this SKILL.md>"` (turns on the band and the
    automatic compaction at 200k; `--compactar-em=N` changes the limit). Also pass
    `--repos=owner/repo,...` with the repositories where the batch will merge or deploy: if another
-   active main session registered any of them, the band warns, and before each merge or deploy
+   active main session registered any of them, the plugin warns the main session, and before each merge or deploy
    there the main session checks main and the server (`merge-ci.md`).
 2. Suggest the `permissions.md` allowlist to the owner if it is not applied yet (apply only with ok).
 3. Split into **independent** fronts (not touching the same files). Dependent fronts branch off the
@@ -139,8 +139,8 @@ Experimental (optional) to start the "(cont.)" without waiting for an owner mess
 - **The owner's answer** (from the question, or a typed `Dn: …`) → **in the same turn**, before
   anything else: pass it to the child quoting their words (`SendMessage`), then
   `metricas.mjs decidiu --id=Dn`. Never "I'll pass it on later". A skipped question stays queued.
-  A decision never leaves the queue without the owner's answer. With the plugin, the band shows
-  how many are queued and flags in yellow an asked one still queued at the end of the turn.
+  A decision never leaves the queue without the owner's answer. With the plugin, the main session
+  gets a warning with the owner's next message if an asked decision stayed queued.
 - Close with: what came in, who waits on what and the next action.
 - And always with the **fronts board** at the end of the final message: one line per front not yet
   archived, **all of them, including those with no news**, always in the same order (the state

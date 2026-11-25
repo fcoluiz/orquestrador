@@ -26,7 +26,7 @@ resolve o **caminho absoluto** dessa pasta, grava no estado do lote e o passa em
    gravar --estado="<caminho do estado>" --skill="<caminho deste SKILL.md>"` (liga a faixa e a
    compactação automática em 200k; `--compactar-em=N` muda o limite). Passe também
    `--repos=dono/repo,...` com os repositórios em que o lote vai mesclar ou publicar: se outra
-   principal ativa registrou algum deles, a faixa avisa, e antes de cada merge ou deploy nesse
+   principal ativa registrou algum deles, o plugin avisa a principal, e antes de cada merge ou deploy nesse
    repositório a principal confere o main e o servidor (`merge-ci.md`).
 2. Sugerir ao dono a allowlist de `permissoes.md` se ainda não estiver aplicada (só aplica com ok).
 3. Dividir em frentes **independentes** (sem tocar os mesmos arquivos). Dependentes partem da
@@ -134,8 +134,8 @@ seção "Experimental". Recusado → o card acima, sem mudança.
 - **Resposta do dono** (da pergunta, ou `Dn: …` digitado) → **no mesmo turno**, antes de qualquer
   outra coisa: repassar à filha citando as palavras dele (`SendMessage`) e só então
   `metricas.mjs decidiu --id=Dn`. Nunca "repasso depois". Pergunta sem resposta (o dono pulou)
-  fica na fila. Decisão nunca sai da fila sem resposta do dono. Com o plugin, a faixa mostra
-  quantas estão na fila e acusa em amarelo a perguntada que ficou nela no fim do turno.
+  fica na fila. Decisão nunca sai da fila sem resposta do dono. Com o plugin, a principal recebe um
+  aviso junto com a mensagem seguinte do dono se uma decisão perguntada ficou na fila.
 - Fechar com: o que entrou, quem espera o quê e a próxima ação.
 - E sempre com o **quadro das frentes**, no fim da mensagem final: uma linha por frente ainda não
   arquivada, **todas, inclusive as sem novidade**, sempre na mesma ordem (a da tabela do estado),
